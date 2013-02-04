@@ -1,10 +1,10 @@
-package main
+package goatpress
 
 import (
   "fmt"
 )
 
 func main() {
-  fmt.Printf("Hello world\n");
+  fmt.Printf("Hello goatpress\n");
 }
 
