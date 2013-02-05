@@ -8,11 +8,6 @@ import (
 
 const defaultDataPath string = "/Users/dan/Dropbox/projects/go/src/goatpress/data/words"
 
-type Board struct {
-  Size    int
-  Letters [][]string
-}
-
 // *** WordSet
 
 type WordSet interface {
@@ -31,6 +26,27 @@ func newWordSet() *HashWordSet {
   return &HashWordSet{make(map[string]bool), make([]string, 0)}
 }
 
+func defaultWordSet() *HashWordSet {
+  return newWordSetFromFile(defaultDataPath)
+}
+
+func newWordSetFromFile(path string) *HashWordSet {
+  b, err := ioutil.ReadFile(path)
+  if err != nil {
+    panic(err)
+  }
+  allWords := strings.Split(string(b), "\n")
+  allWords = allWords[:len(allWords)-1]
+  // strip words with uppercase in them and shorter than 2 characters
+  words := newWordSet()
+  for _, w := range allWords {
+    if w == strings.ToLower(w) && len(w) > 1 {
+      words.Add(w)
+    }
+  }
+  return words
+}
+
 func (set *HashWordSet) Add(word string) {
   set.words[word] = true
   set.words2 = append(set.words2, word)
@@ -47,23 +63,6 @@ func (set *HashWordSet) ChooseRandom() string {
 
 func (set *HashWordSet) Length() int {
   return len(set.words2)
-}
-
-func newWordSetFromFile(path string) WordSet {
-  b, err := ioutil.ReadFile(path)
-  if err != nil {
-    panic(err)
-  }
-  allWords := strings.Split(string(b), "\n")
-  allWords = allWords[:len(allWords)-1]
-  // strip words with uppercase in them and shorter than 2 characters
-  words := newWordSet()
-  for _, w := range allWords {
-    if w == strings.ToLower(w) && len(w) > 1 {
-      words.Add(w)
-    }
-  }
-  return words
 }
 
 // *** BoardGenerator
@@ -116,5 +115,12 @@ func (bg *BoardGenerator) newBoard(size int) *Board {
     }
   }
   return &Board{size, letters}
+}
+
+// *** Board
+
+type Board struct {
+  Size    int
+  Letters [][]string
 }
 

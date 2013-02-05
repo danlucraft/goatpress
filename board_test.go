@@ -4,6 +4,20 @@ import (
   "testing"
 )
 
+func TestHashWordSet(t *testing.T) {
+  set := newWordSet()
+  set.Add("hello")
+  set.Add("hi")
+  a1 := set.Includes("hello")
+  if !a1 { t.Errorf("include hello failed", a1, true) }
+  a2 := set.Includes("hippie")
+  if a2 { t.Errorf("include hippie failed", a2, false) }
+  a3 := set.ChooseRandom()
+  if a3 != "hi" && a3 != "hello" {
+    t.Errorf("ChooseRandom didn't choose one")
+  }
+}
+
 func TestNewWordSetFromFile(t *testing.T) {
   set := newWordSetFromFile(defaultDataPath)
   if !set.Includes("aa") { t.Errorf("wordSet doesn't include aa") }
@@ -31,16 +45,16 @@ func TestMakingNewBoards(t *testing.T) {
   }
 }
 
-func TestHashWordSet(t *testing.T) {
-  set := newWordSet()
-  set.Add("hello")
-  set.Add("hi")
-  a1 := set.Includes("hello")
-  if !a1 { t.Errorf("include hello failed", a1, true) }
-  a2 := set.Includes("hippie")
-  if a2 { t.Errorf("include hippie failed", a2, false) }
-  a3 := set.ChooseRandom()
-  if a3 != "hi" && a3 != "hello" {
-    t.Errorf("ChooseRandom didn't choose one")
-  }
+func TestBoard(t *testing.T) {
+  bg := defaultBoardGenerator()
+  board := bg.newBoard(5)
+  board.Letters[0][0] = "h"
+  board.Letters[0][1] = "e"
+  board.Letters[0][2] = "l"
+  board.Letters[0][3] = "l"
+  board.Letters[0][4] = "o"
 }
+
+
+
+
