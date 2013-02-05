@@ -68,6 +68,8 @@ func newWordSetFromFile(path string) WordSet {
 
 // *** BoardGenerator
 
+const boardRandomizationCount int = 100
+
 type BoardGenerator struct {
   Words WordSet
 }
@@ -90,12 +92,29 @@ func (bg *BoardGenerator) newBoard(size int) *Board {
     word := bg.Words.ChooseRandom()
     for _, char := range word {
       if current < size*size {
-        letters[current / 5][current % 5] = string(char)
+        letters[current / size][current % size] = string(char)
       }
       current += 1
     }
   }
-
+  for i := 0; i < boardRandomizationCount; i++ {
+    // swap row
+    row1 := rand.Intn(size)
+    row2 := rand.Intn(size)
+    for j := 0; j < size; j++ {
+      tmp := letters[row1][j]
+      letters[row1][j] = letters[row2][j]
+      letters[row2][j] = tmp
+    }
+    // swap column
+    col1 := rand.Intn(size)
+    col2 := rand.Intn(size)
+    for j := 0; j < size; j++ {
+      tmp := letters[j][col1]
+      letters[j][col1] = letters[j][col2]
+      letters[j][col2] = tmp
+    }
+  }
   return &Board{size, letters}
 }
 
