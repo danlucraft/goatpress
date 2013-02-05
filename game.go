@@ -29,5 +29,6 @@ func (game *Game) IsValidWord(move [][]int) bool {
 }
 
 func (game *Game) IsValidMove(move [][]int) bool {
+  if len(move) == 0 { return true } // pass
   return game.IsValidWord(move) // TODO implement previous move checking
 }

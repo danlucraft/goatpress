@@ -41,3 +41,24 @@ func TestValidWordChecking(t *testing.T) {
   }
 }
 
+func TestValidMoveChecking(t *testing.T) {
+  gameType := newGameType(5, DefaultWordSet)
+  game := gameType.NewGame()
+
+  game.Board.Letters[0][0] = "h"
+  game.Board.Letters[0][1] = "e"
+  game.Board.Letters[0][2] = "l"
+  game.Board.Letters[0][3] = "l"
+  game.Board.Letters[0][4] = "o"
+
+  if game.IsValidMove([][]int {[]int {0,0}}) {
+    t.Errorf("'h' was a valid move when it shouldn't have been")
+  }
+  if !game.IsValidMove([][]int {[]int {0,0}, []int {0,1}, []int {0,2}, []int {0,3}, []int {0,4}}) {
+    t.Errorf("hello wasn't a valid move when it should have been")
+  }
+  if !game.IsValidMove([][]int {}) {
+    t.Errorf("'' wasn't a valid move when it should have been")
+  }
+}
+
