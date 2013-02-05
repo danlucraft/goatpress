@@ -26,6 +26,8 @@ func newWordSet() *HashWordSet {
   return &HashWordSet{make(map[string]bool), make([]string, 0)}
 }
 
+var DefaultWordSet = newWordSetFromFile(defaultDataPath)
+
 func defaultWordSet() *HashWordSet {
   return newWordSetFromFile(defaultDataPath)
 }
@@ -74,7 +76,7 @@ type BoardGenerator struct {
 }
 
 func defaultBoardGenerator() *BoardGenerator {
-  return newBoardGenerator(newWordSetFromFile(defaultDataPath))
+  return newBoardGenerator(DefaultWordSet)
 }
 
 func newBoardGenerator(words WordSet) *BoardGenerator {
@@ -123,4 +125,13 @@ type Board struct {
   Size    int
   Letters [][]string
 }
+
+func (board *Board) WordFromMove(move [][]int) string {
+  word := ""
+  for _, c := range move {
+    word += board.Letters[c[0]][c[1]]
+  }
+  return word
+}
+
 

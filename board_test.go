@@ -19,7 +19,7 @@ func TestHashWordSet(t *testing.T) {
 }
 
 func TestNewWordSetFromFile(t *testing.T) {
-  set := newWordSetFromFile(defaultDataPath)
+  set := DefaultWordSet
   if !set.Includes("aa") { t.Errorf("wordSet doesn't include aa") }
   if set.Includes("a") { t.Errorf("wordSet includes a") }
 
@@ -53,6 +53,10 @@ func TestBoard(t *testing.T) {
   board.Letters[0][2] = "l"
   board.Letters[0][3] = "l"
   board.Letters[0][4] = "o"
+  word := board.WordFromMove([][]int {[]int {0,0}, []int {0,1}, []int {0,2}, []int {0,3}, []int {0,4}})
+  if word != "hello" {
+    t.Errorf("board.WordFromMove", word, "hello")
+  }
 }
 
 
