@@ -6,10 +6,11 @@ import (
 )
 
 type Client struct {
-  Conn net.Conn
+  name string
+  conn net.Conn
 }
 
-func newClient() *Client {
+func newClient(name string) *Client {
   servAddr := "localhost:4123"
   tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
   if err != nil {
@@ -23,25 +24,26 @@ func newClient() *Client {
     os.Exit(1)
   }
 
-  return &Client{conn}
+  return &Client{name, conn}
 }
 
 func (c *Client) Run() {
-  _, err := c.Conn.Write([]byte("hello"))
-  if err != nil {
-    println("Write to server failed:", err.Error())
-    os.Exit(1)
-  }
-
   reply := make([]byte, 1024)
-
-  _, err = c.Conn.Read(reply)
+  _, err := c.conn.Read(reply)
   if err != nil {
     println("Read from server failed:", err.Error())
     os.Exit(1)
   }
 
-  println("reply from server=", string(reply))
+  println("message from server=", string(reply))
 
-  c.Conn.Close()
+  _, err = c.conn.Write([]byte(c.name))
+  if err != nil {
+    println("Write to server failed:", err.Error())
+    os.Exit(1)
+  }
+
+  c.conn.Close()
 }
+
+

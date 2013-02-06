@@ -18,14 +18,6 @@ func newServer() *Server {
   return &Server{tourney}
 }
 
-func EchoFunc(conn net.Conn) {
-  println("Connection!")
-  buf := make([]byte, 1024)
-  conn.Read(buf)
-  println(string(buf))
-  conn.Write([]byte("bakc"))
-}
-
 func (c *Server) Run() {
   listener, err := net.Listen("tcp", serverAddress)
   if err != nil {
@@ -34,12 +26,22 @@ func (c *Server) Run() {
   }
 
   for {
-    println("listening")
+    println("waiting")
     conn, err := listener.Accept()
     if err != nil {
       println("Error accept:", err.Error())
       return
     }
-    go EchoFunc(conn)
+    go AcceptPlayer(conn)
   }
 }
+
+const serverSig = "goatpress<VERSION=1>;"
+
+func AcceptPlayer(conn net.Conn) {
+  conn.Write([]byte(serverSig))
+  player := newClientPlayer(conn)
+  fmt.Printf("Player Online: %s\n", player.Name())
+}
+
+

@@ -1,5 +1,9 @@
 package goatpress
 
+import (
+  "net"
+)
+
 type Player interface {
   Name() string
   GetMove(GameState) Move
@@ -24,5 +28,17 @@ func (p InternalPlayer) GetMove(state GameState) Move {
 }
 
 type ClientPlayer struct {
+  name string
+  conn net.Conn
+}
 
+func (p ClientPlayer) Name() string {
+  return p.name
+}
+
+func newClientPlayer(conn net.Conn) ClientPlayer {
+  buf := make([]byte, 1024)
+  n, _ := conn.Read(buf)
+  name := string(buf[0:n])
+  return ClientPlayer{name,conn}
 }

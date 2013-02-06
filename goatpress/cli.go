@@ -17,7 +17,7 @@ func ServerStart() {
   server.Run()
 }
 
-func ClientStart() {
-  client := newClient()
+func ClientStart(name string) {
+  client := newClient(name)
   client.Run()
 }
