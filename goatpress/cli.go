@@ -11,3 +11,13 @@ func Demo() {
 
   tourney.PlayMatch()
 }
+
+func ServerStart() {
+  server := newServer()
+  server.Run()
+}
+
+func ClientStart() {
+  client := newClient()
+  client.Run()
+}
