@@ -6,8 +6,8 @@ import (
 
 func TestMatchBetweenPassesPlayers(t *testing.T) {
   gameType := newGameType(5, DefaultWordSet)
-  player1 := newInternalPlayer("test1", newPassFinder())
-  player2 := newInternalPlayer("test2", newPassFinder())
+  player1 := newInternalPlayer("Alice", newPassFinder())
+  player2 := newInternalPlayer("Bob", newPassFinder())
   match := newMatch(gameType, player1, player2)
   match.Play()
   winner := match.Winner()
@@ -18,8 +18,8 @@ func TestMatchBetweenPassesPlayers(t *testing.T) {
 
 func TestMatchBetweenRandomPlayers(t *testing.T) {
   gameType := newGameType(5, testWordSet())
-  player1 := newInternalPlayer("test1", newPassFinder())
-  player2 := newInternalPlayer("test2", newPassFinder())
+  player1 := newInternalPlayer("Alice", newRandomFinder(testWordSet()))
+  player2 := newInternalPlayer("Bob", newRandomFinder(testWordSet()))
   match := newMatch(gameType, player1, player2)
   SetupBoard(&match.Game.Board)
   state := match.Game.CurrentGameState()
@@ -27,5 +27,6 @@ func TestMatchBetweenRandomPlayers(t *testing.T) {
     t.Errorf("Board.ToString didn't return right string", state.Board.ToString(), "")
   }
   match.Play()
+  state = match.Game.CurrentGameState()
 }
 

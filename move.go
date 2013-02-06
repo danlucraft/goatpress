@@ -1,5 +1,9 @@
 package goatpress
 
+import (
+  "fmt"
+)
+
 type Move struct {
   IsPass      bool
   Tiles       []Tile
@@ -19,3 +23,6 @@ func (move *Move) HasTile(tile Tile) bool {
   return false
 }
 
+func (move *Move) ToString() string {
+  return fmt.Sprintf("<Move: %s>", move.Word)
+}

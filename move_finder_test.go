@@ -37,4 +37,11 @@ func TestRandomMoveFinder(t *testing.T) {
   if move.Word != "he" {
     t.Errorf("RandomFinder didn't return the only word 'he'", move.Word, "he")
   }
+
+  // SHouldn't play moves twice
+  game.Move(move)
+  move = finder.GetMove(game.CurrentGameState())
+  if !move.IsPass {
+    t.Errorf("RandomFinder returned the same move again")
+  }
 }

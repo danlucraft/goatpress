@@ -1,10 +1,14 @@
 package goatpress
 
+import (
+  "fmt"
+)
+
 type Match struct {
-  Game    *Game
-  Player1 Player
-  Player2 Player
-  played  bool
+  Game      *Game
+  Player1   Player
+  Player2   Player
+  played    bool
 }
 
 func newMatch(gt *GameType, p1 Player, p2 Player) *Match {
@@ -19,11 +23,23 @@ func (m *Match) Play() {
   players := [3]Player {nil, m.Player1, m.Player2}
   for m.Game.WhoseMove() != 0 {
     thisPlayer := players[m.Game.WhoseMove()]
-    move := thisPlayer.GetMove(m.Game.CurrentGameState())
     response := MOVE_UNMADE
-    for response != MOVE_OK { // should have limit on number of invalid moves?
+    i := 0
+    move := MakePassMove()
+    for i < 100 && response != MOVE_OK { // should have limit on number of invalid moves?
+      move = thisPlayer.GetMove(m.Game.CurrentGameState())
+      fmt.Printf("cand player: %s, move: %s\n", thisPlayer.Name(), move.ToString())
       response = m.Game.Move(move)
+      i++
     }
+
+    if response != MOVE_OK {
+      move = MakePassMove()
+      m.Game.Move(move)
+    }
+    colorMask := m.Game.ColorMask()
+    colorString := colorMask.ToString()
+    fmt.Printf("MOVE player: %s, move: %s, colors:%s\n", thisPlayer.Name(), move.ToString(), colorString)
   }
 }
 

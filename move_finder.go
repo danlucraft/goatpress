@@ -1,5 +1,9 @@
 package goatpress
 
+import (
+  "strings"
+)
+
 type MoveFinder interface {
   GetMove(GameState) Move
 }
@@ -29,12 +33,20 @@ func (f *RandomFinder) GetMove(state GameState) Move {
   for i := 0; i < 10000; i++ {
     // possible word
     word := wordSet.ChooseRandom()
-    move := state.Board.RandomMoveFromWord(word)
-    if !move.IsPass {
-      return move
+    alreadyPlayed := false
+    for _, move := range state.Moves {
+      if move.Word == word || strings.HasPrefix(move.Word, word) {
+        alreadyPlayed = true
+      }
+    }
+    if !alreadyPlayed {
+      move := state.Board.RandomMoveFromWord(word)
+      if !move.IsPass {
+        return move
+      }
     }
   }
-  return Move{false, []Tile {}, ""}
+  return MakePassMove()
 }
 
 func newRandomFinder(words WordSet) *RandomFinder {
