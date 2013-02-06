@@ -2,15 +2,25 @@ package goatpress
 
 type Player interface {
   Name() string
-  MakeMove(GameState) Move
+  GetMove(GameState) Move
 }
 
 type InternalPlayer struct {
+  name       string
   MoveFinder MoveFinder
 }
 
-func newInternalPlayer(moveFinder MoveFinder) InternalPlayer {
-  return InternalPlayer{moveFinder}
+func newInternalPlayer(name string, moveFinder MoveFinder) InternalPlayer {
+  return InternalPlayer{name, moveFinder}
+}
+
+func (p InternalPlayer) Name() string {
+  return p.name
+}
+
+func (p InternalPlayer) GetMove(state GameState) Move {
+  moveFinder := p.MoveFinder
+  return moveFinder.GetMove(state)
 }
 
 type ClientPlayer struct {

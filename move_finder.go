@@ -1,7 +1,7 @@
 package goatpress
 
 type MoveFinder interface {
-  GetMove(Board, GameState) Move
+  GetMove(GameState) Move
 }
 
 // PassFinder: always passes
