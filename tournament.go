@@ -57,10 +57,31 @@ func (t *Tournament) RandomPlayer() Player {
     }
     j++
   }
-  panic("your indexing is bad")
+  panic("your programming is bad")
+}
+
+func (t *Tournament) ScoreFor(name string) int {
+  score := 0
+  for _, match := range t.Matches {
+    if match.Winner() == 1 {
+      if match.Player1.Name() == name {
+        score += 3
+      }
+    } else if match.Winner() == 2 {
+      if match.Player2.Name() == name {
+        score += 3
+      }
+    } else {
+      score += 1
+    }
+  }
+  return score
 }
 
 func (t *Tournament) Size() int {
   return len(t.Players)
 }
+
+
+
 

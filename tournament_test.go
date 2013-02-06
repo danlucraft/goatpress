@@ -41,4 +41,10 @@ func TestNewTournament(t *testing.T) {
   if len(tourney.Matches) != 5 {
     t.Errorf("T PlayMatch didn't play a match")
   }
+
+  score1 := tourney.ScoreFor(player1.Name())
+  score2 := tourney.ScoreFor(player2.Name())
+  if score1 + score2 == 0 {
+    t.Errorf("no one has any score")
+  }
 }
