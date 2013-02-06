@@ -28,3 +28,13 @@ func TestNewWordSetFromFile(t *testing.T) {
   }
 }
 
+func testWordSet() WordSet {
+  words := newWordSet()
+  words.Add("hello")
+  words.Add("state")
+  words.Add("jenga")
+  words.Add("pages")
+  words.Add("valid")
+  return words
+}
+

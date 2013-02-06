@@ -9,5 +9,10 @@ type InternalPlayer struct {
   MoveFinder MoveFinder
 }
 
+func newInternalPlayer(moveFinder MoveFinder) InternalPlayer {
+  return InternalPlayer{moveFinder}
+}
+
 type ClientPlayer struct {
+
 }

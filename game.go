@@ -13,7 +13,7 @@ func newGameType(size int, words WordSet) *GameType {
 
 func (gt *GameType) NewGame() *Game {
   bg := &BoardGenerator{gt.Words}
-  return &Game{*bg.newBoard(gt.BoardSize), *gt}
+  return &Game{*bg.newBoard(gt.BoardSize), *gt, make([]Move, 0)}
 }
 
 // Game: an instance of a GameType and a Board
@@ -21,7 +21,14 @@ func (gt *GameType) NewGame() *Game {
 type Game struct {
   Board     Board
   Type      GameType
+  Moves     []Move
 }
+
+const (
+  MOVE_INVALID_WORD = iota
+  MOVE_TOO_SHORT    = iota
+  MOVE_OK           = iota
+)
 
 func (game *Game) IsValidWord(word string) bool {
   return game.Type.Words.Includes(word)
@@ -33,23 +40,60 @@ func (game *Game) IsValidMove(move Move) bool {
   return game.IsValidWord(word) // TODO implement previous move checking
 }
 
-func (game *Game) CurrentGameState() GameState {
-  colors := make([][]int, game.Type.BoardSize)
-  for i := 0; i < game.Type.BoardSize; i++ {
-    colors[i] = make([]int, game.Type.BoardSize)
+func (game *Game) ColorMask() ColorMask {
+  return newColorMask(&game.Board, game.Moves)
+}
+
+func (game *Game) UncoloredSquareCount() int {
+  r := 0
+  colors := game.ColorMask()
+  l := game.Type.BoardSize
+  for i := 0; i < l*l; i++ {
+    if colors[i / 5][i % 5] == 0 {
+      r++
+    }
   }
-  return GameState{0, 0, game.Board, colors, make([]Move, 0)}
+  return r
+}
+
+func (game *Game) ColorString() string {
+  colorMask := game.ColorMask()
+  return colorMask.ToString()
+}
+
+func (game *Game) CurrentGameState() GameState {
+  colorMask := game.ColorMask()
+  return GameState{game.WhoseMove(), colorMask.Score(1), colorMask.Score(2),
+                    game.Board, game.ColorMask(), game.ColorString(), game.Moves}
+}
+
+func (game *Game) WhoseMove() int {
+  if game.UncoloredSquareCount() == 0 { return 0 }
+  return (len(game.Moves) % 2) + 1
+}
+
+func (game *Game) Move(move Move) int {
+  if len(move.Word) < 2 {
+    return MOVE_TOO_SHORT
+  }
+  if !game.IsValidWord(move.Word) {
+    return MOVE_INVALID_WORD
+  }
+  game.Moves = append(game.Moves, move)
+  return MOVE_OK
 }
 
 // *** GameState: a representation of the current state 
 // of the game.
 
 type GameState struct {
-  Score1 int
-  Score2 int
-  Board  Board
-  Colors [][]int
-  Moves  []Move
+  WhoseMove int
+  Score1    int
+  Score2    int
+  Board     Board
+  Colors    [][]int
+  ColorString string
+  Moves     []Move
 }
 
 

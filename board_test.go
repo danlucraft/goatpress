@@ -81,6 +81,55 @@ func TestBoard(t *testing.T) {
 
 }
 
+func TestColorMask(t *testing.T) {
+  bg := defaultBoardGenerator()
+  board := bg.newBoard(5)
+  SetupBoard(board)
+  colorMask := newColorMask(board,
+                  []Move {
+                    board.MoveFromTiles([]Tile {newTile(0,0), newTile(1,2)}),
+                    board.MoveFromTiles([]Tile {newTile(3,2), newTile(1,2)})})
+  expColorMaskString := "10000 00200 00000 00200 00000"
+  if colorMask.ToString() != expColorMaskString {
+    t.Errorf("color mask is wrong", colorMask.ToString(), expColorMaskString)
+  }
+  if colorMask.Score(1) != 1 {
+    t.Errorf("wrong score for player 1", colorMask.Score(1), 1)
+  }
+  if colorMask.Score(2) != 2 {
+    t.Errorf("wrong score for player 2", colorMask.Score(2), 2)
+  }
+}
 
+func SetupBoard(board *Board) {
+  board.Letters[0][0] = "h"
+  board.Letters[0][1] = "e"
+  board.Letters[0][2] = "l"
+  board.Letters[0][3] = "l"
+  board.Letters[0][4] = "o"
 
+  board.Letters[1][0] = "s"
+  board.Letters[1][1] = "t"
+  board.Letters[1][2] = "a"
+  board.Letters[1][3] = "t"
+  board.Letters[1][4] = "e"
+
+  board.Letters[2][0] = "j"
+  board.Letters[2][1] = "e"
+  board.Letters[2][2] = "n"
+  board.Letters[2][3] = "g"
+  board.Letters[2][4] = "a"
+
+  board.Letters[3][0] = "p"
+  board.Letters[3][1] = "a"
+  board.Letters[3][2] = "g"
+  board.Letters[3][3] = "e"
+  board.Letters[3][4] = "s"
+
+  board.Letters[4][0] = "v"
+  board.Letters[4][1] = "a"
+  board.Letters[4][2] = "l"
+  board.Letters[4][3] = "i"
+  board.Letters[4][4] = "d"
+}
 

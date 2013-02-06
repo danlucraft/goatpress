@@ -162,8 +162,63 @@ func (board *Board) HasLetters() map[string]bool {
   return result
 }
 
+func (board *Board) ToString() string {
+  r := ""
+  l := board.Size
+  for i := 0; i < l; i++ {
+    for j := 0; j < l; j++ {
+      r += board.Letters[i][j]
+    }
+    if i < l - 1 {
+      r += " "
+    }
+  }
+  return r
+}
 
+type ColorMask [][]int
 
+func newColorMask(b *Board, moves []Move) ColorMask {
+  colors := make([][]int, b.Size)
+  for i := 0; i < b.Size; i++ {
+    colors[i] = make([]int, b.Size)
+  }
+  moveCount := 0
+  for _, move := range moves {
+    player := (moveCount % 2) + 1
+    for _, tile := range move.Tiles {
+      colors[tile.X()][tile.Y()] = player
+    }
+    moveCount += 1
+  }
+  return ColorMask(colors)
+}
+
+func (cm *ColorMask) Score(player int) int {
+  score := 0
+  for _, row := range [][]int(*cm) {
+    for _, c := range row {
+      if c == player {
+        score++
+      }
+    }
+  }
+  return score
+}
+
+func (cm *ColorMask) ToString() string {
+  r := ""
+  l := len([][]int(*cm))
+  for i := 0; i < l; i++ {
+    for j := 0; j < l; j++ {
+      r += fmt.Sprintf("%d", [][]int(*cm)[i][j])
+    }
+    if i < l - 1 {
+      r += " "
+    }
+  }
+  return r
+}
 
 
 
