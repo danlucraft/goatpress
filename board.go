@@ -1,70 +1,28 @@
 package goatpress
 
 import (
-  "io/ioutil"
-  "strings"
   "math/rand"
+  "fmt"
 )
 
-const defaultDataPath string = "/Users/dan/Dropbox/projects/go/src/goatpress/data/words"
+// *** Tile
 
-// *** WordSet
+type Tile []int
 
-type WordSet interface {
-  Add(string)
-  Includes(string) bool
-  ChooseRandom() string
-  Length() int
+func newTile(i int, j int) Tile {
+  return []int{i, j}
 }
 
-type HashWordSet struct {
-  words map[string]bool
-  words2 []string
+func (t *Tile) X() int {
+  return []int(*t)[0]
 }
 
-func newWordSet() *HashWordSet {
-  return &HashWordSet{make(map[string]bool), make([]string, 0)}
+func (t *Tile) Y() int {
+  return []int(*t)[1]
 }
 
-var DefaultWordSet = newWordSetFromFile(defaultDataPath)
-
-func defaultWordSet() *HashWordSet {
-  return newWordSetFromFile(defaultDataPath)
-}
-
-func newWordSetFromFile(path string) *HashWordSet {
-  b, err := ioutil.ReadFile(path)
-  if err != nil {
-    panic(err)
-  }
-  allWords := strings.Split(string(b), "\n")
-  allWords = allWords[:len(allWords)-1]
-  // strip words with uppercase in them and shorter than 2 characters
-  words := newWordSet()
-  for _, w := range allWords {
-    if w == strings.ToLower(w) && len(w) > 1 {
-      words.Add(w)
-    }
-  }
-  return words
-}
-
-func (set *HashWordSet) Add(word string) {
-  set.words[word] = true
-  set.words2 = append(set.words2, word)
-}
-
-func (set *HashWordSet) Includes(word string) bool {
-  _, found := set.words[word]
-  return found
-}
-
-func (set *HashWordSet) ChooseRandom() string {
-  return set.words2[rand.Intn(len(set.words2))]
-}
-
-func (set *HashWordSet) Length() int {
-  return len(set.words2)
+func (t *Tile) Key() string {
+  return fmt.Sprintf("%d-%d", t.X(), t.Y())
 }
 
 // *** BoardGenerator
@@ -119,19 +77,93 @@ func (bg *BoardGenerator) newBoard(size int) *Board {
   return &Board{size, letters}
 }
 
-// *** Board
+// *** Board: a set of letters arranged in a grid
 
 type Board struct {
   Size    int
   Letters [][]string
 }
 
-func (board *Board) WordFromMove(move [][]int) string {
+func (board *Board) MoveFromTiles(tiles []Tile) Move {
   word := ""
-  for _, c := range move {
-    word += board.Letters[c[0]][c[1]]
+  isPass := (len(tiles) == 0)
+  for _, tile := range tiles {
+    word += board.Letters[tile.X()][tile.Y()]
+  }
+  return Move{isPass, tiles, word}
+}
+
+func (board *Board) WordFromTiles(tiles []Tile) string {
+  word := ""
+  for _, c := range tiles {
+    word += board.Letters[c.X()][c.Y()]
   }
   return word
 }
+
+
+func (board *Board) TilesForLetterExcluding(letter string, tiles []Tile) []Tile {
+  hasTiles := make(map[string]bool)
+  for _, tile := range tiles {
+    hasTiles[tile.Key()] = true
+  }
+  result := make([]Tile, 0)
+  for i := 0; i < board.Size; i++ {
+    for j := 0; j < board.Size; j++ {
+      if board.Letters[i][j] == letter {
+        tile := newTile(i, j)
+        if !hasTiles[tile.Key()] {
+          result = append(result, tile)
+          hasTiles[tile.Key()] = true
+        }
+      }
+    }
+  }
+  return result
+}
+
+func (board *Board) RandomMoveFromWord(word string) Move {
+  hasLetters := board.HasLetters()
+
+  // prefilter on has the right letters
+  found1 := true
+  j := 0
+  for found1 && j < len(word) {
+    if !hasLetters[string(word[j])] {
+      found1 = false
+    }
+    j++
+  }
+
+  // construct the move, if possible
+  if found1 {
+    moveTiles := make([]Tile, 0)
+    for _, char := range word {
+      candidateTiles := board.TilesForLetterExcluding(string(char), moveTiles)
+      if len(candidateTiles) > 0 {
+        tile := candidateTiles[rand.Intn(len(candidateTiles))]
+        moveTiles = append(moveTiles, tile)
+      } else {
+        return MakePassMove()
+      }
+    }
+    return board.MoveFromTiles(moveTiles)
+  }
+  return MakePassMove()
+}
+
+func (board *Board) HasLetters() map[string]bool {
+  result := make(map[string]bool)
+  for _, row := range board.Letters {
+    for _, letter := range row {
+      result[letter] = true
+    }
+  }
+  return result
+}
+
+
+
+
 
 

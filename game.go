@@ -23,12 +23,35 @@ type Game struct {
   Type      GameType
 }
 
-func (game *Game) IsValidWord(move [][]int) bool {
-  word := game.Board.WordFromMove(move)
+func (game *Game) IsValidWord(word string) bool {
   return game.Type.Words.Includes(word)
 }
 
-func (game *Game) IsValidMove(move [][]int) bool {
-  if len(move) == 0 { return true } // pass
-  return game.IsValidWord(move) // TODO implement previous move checking
+func (game *Game) IsValidMove(move Move) bool {
+  if len(move.Tiles) == 0 { return true } // pass
+  word := game.Board.WordFromTiles(move.Tiles)
+  return game.IsValidWord(word) // TODO implement previous move checking
 }
+
+func (game *Game) CurrentGameState() GameState {
+  colors := make([][]int, game.Type.BoardSize)
+  for i := 0; i < game.Type.BoardSize; i++ {
+    colors[i] = make([]int, game.Type.BoardSize)
+  }
+  return GameState{0, 0, game.Board, colors, make([]Move, 0)}
+}
+
+// *** GameState: a representation of the current state 
+// of the game.
+
+type GameState struct {
+  Score1 int
+  Score2 int
+  Board  Board
+  Colors [][]int
+  Moves  []Move
+}
+
+
+
+

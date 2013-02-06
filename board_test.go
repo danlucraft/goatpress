@@ -4,30 +4,6 @@ import (
   "testing"
 )
 
-func TestHashWordSet(t *testing.T) {
-  set := newWordSet()
-  set.Add("hello")
-  set.Add("hi")
-  a1 := set.Includes("hello")
-  if !a1 { t.Errorf("include hello failed", a1, true) }
-  a2 := set.Includes("hippie")
-  if a2 { t.Errorf("include hippie failed", a2, false) }
-  a3 := set.ChooseRandom()
-  if a3 != "hi" && a3 != "hello" {
-    t.Errorf("ChooseRandom didn't choose one")
-  }
-}
-
-func TestNewWordSetFromFile(t *testing.T) {
-  set := DefaultWordSet
-  if !set.Includes("aa") { t.Errorf("wordSet doesn't include aa") }
-  if set.Includes("a") { t.Errorf("wordSet includes a") }
-
-  if set.Length() != 210661 {
-    t.Errorf("wordSet not right length", set.Length(), 210661)
-  }
-}
-
 func TestMakingNewBoards(t *testing.T) {
   bg := defaultBoardGenerator()
   board := bg.newBoard(5)
@@ -48,15 +24,61 @@ func TestMakingNewBoards(t *testing.T) {
 func TestBoard(t *testing.T) {
   bg := defaultBoardGenerator()
   board := bg.newBoard(5)
+  for i := 0; i < 25; i++ {
+    board.Letters[i / 5][i % 5] = "q"
+  }
+
   board.Letters[0][0] = "h"
   board.Letters[0][1] = "e"
   board.Letters[0][2] = "l"
   board.Letters[0][3] = "l"
   board.Letters[0][4] = "o"
-  word := board.WordFromMove([][]int {[]int {0,0}, []int {0,1}, []int {0,2}, []int {0,3}, []int {0,4}})
+
+  word := board.WordFromTiles([]Tile {newTile(0, 0), newTile(0, 1), newTile(0, 2), newTile(0, 3), newTile(0, 4)} )
   if word != "hello" {
     t.Errorf("board.WordFromMove", word, "hello")
   }
+  letters := board.HasLetters()
+
+  if !letters["h"] { t.Errorf("board.HasLetters does not include 'h'") }
+  if letters["x"] { t.Errorf("board.HasLetters does include 'x'") }
+
+  if len(board.RandomMoveFromWord("hell").Tiles) != 4 {
+    t.Errorf("board.MoveFromWord('hell') didn't return four tiles")
+  }
+  if board.RandomMoveFromWord("hell").Tiles[1][1] != 1 {
+    t.Errorf("board.MoveFromWord('hell') didn't return correct move")
+  }
+
+  tilesA := board.TilesForLetterExcluding("a", []Tile {})
+  if len(tilesA) != 0 {
+    t.Errorf("board.TilesForLetterExcluding('a') shouldn't have returned anything")
+  }
+
+  tilesH := board.TilesForLetterExcluding("h", []Tile {})
+  if len(tilesH) != 1 {
+    t.Errorf("board.TilesForLetterExcluding('h') should be one tile", len(tilesH), 1)
+  }
+
+  tilesL := board.TilesForLetterExcluding("l", []Tile {})
+  if len(tilesL) != 2 {
+    t.Errorf("board.TilesForLetterExcluding('l') should be two tiles", len(tilesL), 2)
+  }
+  if tilesL[0][0] != 0 || tilesL[0][1] != 2 {
+    t.Errorf("first l tile is not as expected")
+  }
+  if tilesL[1][0] != 0 || tilesL[1][1] != 3 {
+    t.Errorf("second l tile is not as expected")
+  }
+
+  tilesL2 := board.TilesForLetterExcluding("l", []Tile { newTile(0,2) })
+  if len(tilesL2) != 1 {
+    t.Errorf("board.TilesForLetterExcluding('l', 0-2) should be one tiles", len(tilesL2), 1)
+  }
+  if tilesL2[0][0] != 0 || tilesL2[0][1] != 3 {
+    t.Errorf("first excluded l tile is not as expected", tilesL2[0][1], 3)
+  }
+
 }
 
 
