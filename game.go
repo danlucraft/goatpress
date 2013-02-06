@@ -25,6 +25,7 @@ type Game struct {
 }
 
 const (
+  MOVE_UNMADE       = iota
   MOVE_INVALID_WORD = iota
   MOVE_TOO_SHORT    = iota
   MOVE_OK           = iota
