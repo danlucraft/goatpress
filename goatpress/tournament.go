@@ -88,6 +88,12 @@ type TournamentMarshaller struct {
   Count int
 }
 
+func unmarshalTournament(bs []byte) Tournament {
+  var t Tournament
+  json.Unmarshal(bs, &t)
+  return t
+}
+
 func (t *Tournament) Marshal() []byte {
   mms := make([]MatchMarshaller, len(t.Matches))
   for _, match := range t.Matches {
@@ -98,6 +104,11 @@ func (t *Tournament) Marshal() []byte {
   b, _ := json.Marshal(tm)
   return b
 }
+
+
+
+
+
 
 
 
