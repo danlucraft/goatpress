@@ -42,3 +42,9 @@ func newClientPlayer(conn net.Conn) ClientPlayer {
   name := string(buf[0:n])
   return ClientPlayer{name,conn}
 }
+
+func (p ClientPlayer) GetMove(state GameState) Move {
+  return MakePassMove()
+
+}
+

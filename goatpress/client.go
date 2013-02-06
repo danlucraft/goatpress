@@ -43,7 +43,7 @@ func (c *Client) Run() {
     os.Exit(1)
   }
 
-  c.conn.Close()
+  _, err = c.conn.Read(reply)
 }
 
 

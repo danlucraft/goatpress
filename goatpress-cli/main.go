@@ -13,7 +13,7 @@ func usage() {
 func main() {
   playerName := flag.String("name", "", "name")
   flag.Parse()
-  fmt.Printf("Connecting as player %s\n", *playerName)
+  fmt.Printf("command %s\n", flag.Args()[0])
   if len(flag.Args()) < 1 {
     usage()
   } else {
@@ -23,6 +23,7 @@ func main() {
     } else if command == "server" {
       goatpress.ServerStart()
     } else if command == "client" {
+      fmt.Printf("Connecting as player %s\n", *playerName)
       goatpress.ClientStart(*playerName)
     } else if command == "web" {
     } else {
