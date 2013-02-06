@@ -3,6 +3,7 @@ package goatpress
 import (
   "net"
   "os"
+  "regexp"
 )
 
 type Client struct {
@@ -27,23 +28,44 @@ func newClient(name string) *Client {
   return &Client{name, conn}
 }
 
-func (c *Client) Run() {
-  reply := make([]byte, 1024)
-  _, err := c.conn.Read(reply)
-  if err != nil {
-    println("Read from server failed:", err.Error())
-    os.Exit(1)
+func (c *Client) readString() (string,error) {
+  buf := make([]byte, 1024)
+  if n, err := c.conn.Read(buf); err != nil {
+    return "", err
+  } else {
+    return string(buf[0:n]), nil
   }
-
-  println("message from server=", string(reply))
-
-  _, err = c.conn.Write([]byte(c.name))
-  if err != nil {
-    println("Write to server failed:", err.Error())
-    os.Exit(1)
-  }
-
-  _, err = c.conn.Read(reply)
+  return "", nil
 }
+
+var msgNewGame = regexp.MustCompile(`new game`)
+var msgPlay    = regexp.MustCompile(`; play`)
+
+func (c *Client) Run() {
+  version, err := c.readString()
+  if err != nil {
+    println("couldn't read initial version string")
+    os.Exit(1)
+  }
+  println("version: ", version)
+  c.conn.Write([]byte(c.name))
+  for {
+    req, err := c.readString()
+    if err != nil {
+      println("server went away")
+      os.Exit(0)
+    }
+    println("server said: ", req)
+    if msgNewGame.MatchString(req) {
+      println("received new game notification")
+    } else if msgPlay.MatchString(req) {
+      println("play request: sending pass move")
+    }
+  }
+}
+
+
+
+
 
 

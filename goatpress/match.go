@@ -20,16 +20,33 @@ func (m *Match) Play() {
     return
   }
   m.played = true
-  players := [3]Player {nil, m.Player1, m.Player2}
+  players  := [2]Player {m.Player1, m.Player2}
+  messages := [2]int {MSG_NONE, MSG_NONE}
+  m.Player1.NewGame(m.Game.CurrentGameState())
+  m.Player2.NewGame(m.Game.CurrentGameState())
+
   for m.Game.WhoseMove() != 0 {
-    thisPlayer := players[m.Game.WhoseMove()]
+    playerIx := m.Game.WhoseMove() - 1
+    thisPlayer := players[playerIx]
+
     response := MOVE_UNMADE
     i := 0
     move := MakePassMove()
     for i < 100 && response != MOVE_OK { // should have limit on number of invalid moves?
-      move = thisPlayer.GetMove(m.Game.CurrentGameState())
-      //fmt.Printf("cand player: %s, move: %s\n", thisPlayer.Name(), move.ToString())
+      move = thisPlayer.GetMove(messages[playerIx], "", m.Game.CurrentGameState())
       response = m.Game.Move(move)
+      switch response {
+      case MOVE_OK:
+        messages[playerIx] = MSG_OPPONENT_MOVE
+      case MOVE_ALREADY_PLAYED:
+        messages[playerIx] = MSG_BAD_MOVE_ALREADY
+      case MOVE_PREFIX_WORD:
+        messages[playerIx] = MSG_BAD_MOVE_PREFIX
+      case MOVE_INVALID_WORD:
+        messages[playerIx] = MSG_BAD_MOVE_UNKNOWN
+      case MOVE_TOO_SHORT:
+        messages[playerIx] = MSG_BAD_MOVE_TOO_SHORT
+      }
       i++
     }
 
