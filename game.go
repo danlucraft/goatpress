@@ -67,16 +67,23 @@ func (game *Game) CurrentGameState() GameState {
                     game.Board, game.ColorMask(), game.ColorString(), game.Moves}
 }
 
+// 0 game over
+// 1 player 1
+// 2 player 2
 func (game *Game) WhoseMove() int {
   if game.UncoloredSquareCount() == 0 { return 0 }
+  l := len(game.Moves)
+  if l > 1 && game.Moves[l-2].IsPass && game.Moves[l-1].IsPass {
+    return 0
+  }
   return (len(game.Moves) % 2) + 1
 }
 
 func (game *Game) Move(move Move) int {
-  if len(move.Word) < 2 {
+  if !move.IsPass && len(move.Word) < 2 {
     return MOVE_TOO_SHORT
   }
-  if !game.IsValidWord(move.Word) {
+  if !move.IsPass && !game.IsValidWord(move.Word) {
     return MOVE_INVALID_WORD
   }
   game.Moves = append(game.Moves, move)
@@ -95,7 +102,4 @@ type GameState struct {
   ColorString string
   Moves     []Move
 }
-
-
-
 

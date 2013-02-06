@@ -62,7 +62,7 @@ func TestValidMoveChecking(t *testing.T) {
   }
 }
 
-func TestCurrentBoardState(t *testing.T) {
+func TestPlayGameWithWinner(t *testing.T) {
   gameType := newGameType(5, testWordSet())
   game := gameType.NewGame()
   state := game.CurrentGameState()
@@ -129,7 +129,23 @@ func TestCurrentBoardState(t *testing.T) {
   if state.Score2 != 10 { t.Errorf("Score2 is not 10") }
 }
 
+func TestPlayGameWithPassing(t *testing.T) {
+  gameType := newGameType(5, testWordSet())
+  game := gameType.NewGame()
+  state := game.CurrentGameState()
+  SetupBoard(&game.Board)
 
+  result1 := game.Move(MakePassMove())
+  result2 := game.Move(MakePassMove())
+  if result1 != MOVE_OK || result2 != MOVE_OK {
+    t.Errorf("passes weren't ok moves")
+  }
+  state = game.CurrentGameState()
+  if len(state.Moves) != 2 { t.Errorf("wrong number of moves", len(state.Moves), 2) }
+  if state.WhoseMove != 0 { t.Errorf("should be game over") }
+  if state.Score1 != 0 { t.Errorf("Score1 is not 0") }
+  if state.Score2 != 0 { t.Errorf("Score2 is not 0") }
+}
 
 
 
