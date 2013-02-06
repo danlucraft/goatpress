@@ -63,7 +63,9 @@ func TestValidMoveChecking(t *testing.T) {
 }
 
 func TestPlayGameWithWinner(t *testing.T) {
-  gameType := newGameType(5, testWordSet())
+  words := testWordSet()
+  words.Add("hell")
+  gameType := newGameType(5, words)
   game := gameType.NewGame()
   state := game.CurrentGameState()
   SetupBoard(&game.Board)
@@ -107,11 +109,19 @@ func TestPlayGameWithWinner(t *testing.T) {
   // invalid moves
   result := game.Move(game.Board.MoveFromTiles([]Tile{ newTile(2, 0), newTile(2, 2)}))
   if result != MOVE_INVALID_WORD {
-    t.Errorf("a valid move was allowed")
+    t.Errorf("didn't identify an invalid word")
   }
   result = game.Move(game.Board.MoveFromTiles([]Tile{ newTile(2, 0)}))
   if result != MOVE_TOO_SHORT {
-    t.Errorf("a too short move was allowed")
+    t.Errorf("didn't identify a too short word")
+  }
+  result = game.Move(game.Board.MoveFromTiles([]Tile{ newTile(0, 0), newTile(0, 1), newTile(0, 2), newTile(0, 3), newTile(0, 4)}))
+  if result != MOVE_ALREADY_PLAYED {
+    t.Errorf("didn't identify already played word")
+  }
+  result = game.Move(game.Board.MoveFromTiles([]Tile{ newTile(0, 0), newTile(0, 1), newTile(0, 2), newTile(0, 3)}))
+  if result != MOVE_PREFIX_WORD {
+    t.Errorf("didn't identify prefix word")
   }
 
   game.Move(game.Board.MoveFromTiles([]Tile{ newTile(2, 0), newTile(2, 1), newTile(2, 2), newTile(2, 3), newTile(2, 4)}))

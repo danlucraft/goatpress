@@ -1,5 +1,9 @@
 package goatpress
 
+import (
+  "strings"
+)
+
 // GameType: encapsulates settings for a game (size, which words, etc)
 
 type GameType struct {
@@ -25,10 +29,12 @@ type Game struct {
 }
 
 const (
-  MOVE_UNMADE       = iota
-  MOVE_INVALID_WORD = iota
-  MOVE_TOO_SHORT    = iota
-  MOVE_OK           = iota
+  MOVE_OK             = iota
+  MOVE_UNMADE         = iota
+  MOVE_ALREADY_PLAYED = iota
+  MOVE_PREFIX_WORD    = iota
+  MOVE_INVALID_WORD   = iota
+  MOVE_TOO_SHORT      = iota
 )
 
 func (game *Game) IsValidWord(word string) bool {
@@ -68,6 +74,24 @@ func (game *Game) CurrentGameState() GameState {
                     game.Board, game.ColorMask(), game.ColorString(), game.Moves}
 }
 
+func (game *Game) IsWordPlayed(word string) bool {
+  for _, move := range game.Moves {
+    if move.Word == word {
+      return true
+    }
+  }
+  return false
+}
+
+func (game *Game) IsWordPlayedPrefix(word string) bool {
+  for _, move := range game.Moves {
+    if strings.HasPrefix(move.Word, word) {
+      return true
+    }
+  }
+  return false
+}
+
 // 0 game over
 // 1 player 1
 // 2 player 2
@@ -81,11 +105,19 @@ func (game *Game) WhoseMove() int {
 }
 
 func (game *Game) Move(move Move) int {
-  if !move.IsPass && len(move.Word) < 2 {
-    return MOVE_TOO_SHORT
-  }
-  if !move.IsPass && !game.IsValidWord(move.Word) {
-    return MOVE_INVALID_WORD
+  if !move.IsPass {
+    if len(move.Word) < 2 {
+      return MOVE_TOO_SHORT
+    }
+    if !game.IsValidWord(move.Word) {
+      return MOVE_INVALID_WORD
+    }
+    if game.IsWordPlayed(move.Word) {
+      return MOVE_ALREADY_PLAYED
+    }
+    if game.IsWordPlayedPrefix(move.Word) {
+      return MOVE_PREFIX_WORD
+    }
   }
   game.Moves = append(game.Moves, move)
   return MOVE_OK
