@@ -3,6 +3,7 @@ package goatpress
 import (
   "math/rand"
   "fmt"
+  "encoding/json"
 )
 
 type Tournament struct {
@@ -82,6 +83,21 @@ func (t *Tournament) Size() int {
   return len(t.Players)
 }
 
+type TournamentMarshaller struct {
+  Matches []MatchMarshaller
+  Count int
+}
+
+func (t *Tournament) Marshal() []byte {
+  mms := make([]MatchMarshaller, len(t.Matches))
+  for _, match := range t.Matches {
+    mms = append(mms, match.Marshaller())
+  }
+
+  tm := TournamentMarshaller{mms, len(t.Matches)}
+  b, _ := json.Marshal(tm)
+  return b
+}
 
 
 

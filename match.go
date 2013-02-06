@@ -55,6 +55,18 @@ func (m *Match) Winner() int {
   return 0
 }
 
+type MatchMarshaller struct {
+  Player1 string
+  Player2 string
+  Game    GameMarshaller
+}
+
+func (m *Match) Marshaller() MatchMarshaller {
+  mm := MatchMarshaller{m.Player1.Name(), m.Player2.Name(), m.Game.Marshaller()}
+  return mm
+}
+
 func dummyForFmt() {
   fmt.Printf("adsf")
 }
+

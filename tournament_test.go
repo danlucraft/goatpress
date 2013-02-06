@@ -2,6 +2,7 @@ package goatpress
 
 import (
   "testing"
+//  "fmt"
 )
 
 func TestNewTournament(t *testing.T) {
