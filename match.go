@@ -28,7 +28,7 @@ func (m *Match) Play() {
     move := MakePassMove()
     for i < 100 && response != MOVE_OK { // should have limit on number of invalid moves?
       move = thisPlayer.GetMove(m.Game.CurrentGameState())
-      fmt.Printf("cand player: %s, move: %s\n", thisPlayer.Name(), move.ToString())
+      //fmt.Printf("cand player: %s, move: %s\n", thisPlayer.Name(), move.ToString())
       response = m.Game.Move(move)
       i++
     }
@@ -44,5 +44,17 @@ func (m *Match) Play() {
 }
 
 func (m *Match) Winner() int {
+  colorMask := m.Game.ColorMask()
+  score1 := colorMask.Score(1)
+  score2 := colorMask.Score(2)
+  if score1 > score2 {
+    return 1
+  } else if score2 > score1 {
+    return 2
+  }
   return 0
+}
+
+func dummyForFmt() {
+  fmt.Printf("adsf")
 }
