@@ -31,21 +31,25 @@ func (c *Server) Run() {
   go AcceptPlayers(listener)
   for {
     select {
-    case newPlayer:= <-newPlayers:
+    case newPlayer := <-newPlayers:
       if newPlayer.Name() != "" {
         fmt.Printf("Player Online: %s\n", newPlayer.Name())
         c.Tournament.RegisterPlayer(newPlayer)
+      }
+    case removePlayerName := <-removePlayers:
+      if removePlayerName != "" {
+        c.Tournament.DeregisterPlayer(removePlayerName)
       }
     default:
       if c.Tournament.Size() > 1 {
         c.Tournament.PlayMatch()
       }
     }
-    time.Sleep(1e9)
+    time.Sleep(1)
   }
 }
 
-const serverSig = "goatpress<VERSION=1>;"
+const serverSig = "goatpress<VERSION=1> ; \n"
 
 func AcceptPlayers(listener net.Listener) {
   for {
@@ -56,7 +60,9 @@ func AcceptPlayers(listener net.Listener) {
     }
     conn.Write([]byte(serverSig))
     player := newClientPlayer(conn, removePlayers)
-    newPlayers <- player
+    if player != nil {
+      newPlayers <- player
+    }
   }
 }
 

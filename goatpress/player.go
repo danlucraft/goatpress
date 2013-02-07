@@ -2,6 +2,8 @@ package goatpress
 
 import (
   "net"
+  "fmt"
+  "errors"
 )
 
 type Player interface {
@@ -52,31 +54,62 @@ type ClientMessage struct {
   request string
 }
 
-func (p ClientPlayer) NewGame(_ GameState) {
+func (p *ClientPlayer) NewGame(_ GameState) {
   req := "new game; \n"
   p.conn.Write([]byte(req))
 }
 
-func (p ClientPlayer) Name() string {
+func (p *ClientPlayer) Name() string {
   return p.name
 }
 
-func (p ClientPlayer) readString() string {
-  buf := make([]byte, 1024)
-  n, _ := p.conn.Read(buf)
-  return string(buf[0:n])
+func (p *ClientPlayer) writeString(req string) error {
+  _, err := p.conn.Write([]byte(req))
+  if err != nil {
+    go p.Unregister()
+    return errors.New("client closed connection")
+  }
+  fmt.Printf("%s> %s\n", p.Name(), req[0:len(req)-1])
+  return nil
 }
 
-func newClientPlayer(conn net.Conn, unregister chan string) ClientPlayer {
-  conn.Write([]byte("name?\n"))
+func (p ClientPlayer) readString() (string, error) {
   buf := make([]byte, 1024)
-  n, _ := conn.Read(buf)
-  name := string(buf[0:n])
-  return ClientPlayer{name, conn, unregister}
+  n, err := p.conn.Read(buf)
+  if err != nil {
+    go p.Unregister()
+    return "", errors.New("client closed connection")
+  }
+  data := string(buf[0:n])
+  fmt.Printf("%s< %s\n", p.Name(), data[0:len(data)-1])
+  return data, nil
 }
 
-func (p ClientPlayer) GetMove(msg int, info string, state GameState) Move {
+func (p *ClientPlayer) Unregister() {
+  p.unregister <- p.name
+}
+
+func newClientPlayer(conn net.Conn, unregister chan string) *ClientPlayer {
+  p := &ClientPlayer{"", conn, unregister}
+  for p.name == "" {
+    err := p.writeString("; name ?\n")
+    if err != nil {
+      return nil
+    }
+    str, err2 := p.readString()
+    if err2 != nil {
+      return nil
+    }
+    if len(str) > 1 && string(str[len(str)-1]) == "\n" {
+      p.name = str[0:len(str)-1]
+    }
+  }
+  return p
+}
+
+func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
   board := state.Board.ToString()
+  colors := state.ColorString
   var bit1 string
   switch msg {
     case MSG_NONE:               bit1 = ""
@@ -85,9 +118,18 @@ func (p ClientPlayer) GetMove(msg int, info string, state GameState) Move {
     case MSG_BAD_MOVE_TOO_SHORT: bit1 = "invalid: too-short"
     case MSG_OPPONENT_MOVE:      bit1 = "opponent: " + info
   }
-  req := bit1 + " ; play '" + board + "'\n"
-  p.conn.Write([]byte(req))
-  data := p.readString()
+  req := bit1 + " ; move " + board + " " + colors + " ?\n"
+  err1 := p.writeString(req)
+  if err1 != nil {
+    fmt.Printf("%s passes due to closed connection\n", p.name)
+    return MakePassMove()
+  }
+
+  data, err2 := p.readString()
+  if err2 != nil {
+    fmt.Printf("%s passes due to closed connection\n", p.name)
+    return MakePassMove()
+  }
   println(data)
   return MakePassMove()
 }

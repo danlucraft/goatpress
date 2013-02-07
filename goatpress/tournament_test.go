@@ -20,7 +20,7 @@ func TestNewTournament(t *testing.T) {
   if tourney.Size() != 2 {
     t.Errorf("two players added but T size is not 2")
   }
-  tourney.DeregisterPlayer(player2)
+  tourney.DeregisterPlayer(player2.Name())
   if tourney.Size() != 1 {
     t.Errorf("deregister player didn't remove it")
   }

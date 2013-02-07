@@ -23,8 +23,8 @@ func (t *Tournament) RegisterPlayer(p Player) {
   t.Players[p.Name()] = p
 }
 
-func (t *Tournament) DeregisterPlayer(p Player) {
-  delete(t.Players, p.Name())
+func (t *Tournament) DeregisterPlayer(name string) {
+  delete(t.Players, name)
 }
 
 func (t *Tournament) PlayMatch() {
