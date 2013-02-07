@@ -101,6 +101,40 @@ func TestColorMask(t *testing.T) {
   }
 }
 
+func TestColorMaskDarkTaking(t *testing.T) {
+  bg := defaultBoardGenerator()
+  board := bg.newBoard(5)
+  SetupBoard(board)
+  colorMask := newColorMask(board,
+                  []Move {
+                    board.MoveFromTiles([]Tile {newTile(0,0), newTile(0,1), newTile(1,0)})})
+  expColorMaskString := "31000 10000 00000 00000 00000"
+  if colorMask.ToString() != expColorMaskString {
+    t.Errorf("color mask is wrong", colorMask.ToString(), expColorMaskString)
+  }
+  if colorMask.Score(1) != 3 {
+    t.Errorf("wrong score for player 1", colorMask.Score(1), 3)
+  }
+  if colorMask.Score(2) != 0 {
+    t.Errorf("wrong score for player 2", colorMask.Score(2), 0)
+  }
+
+  colorMask = newColorMask(board,
+                  []Move {
+                    board.MoveFromTiles([]Tile {newTile(0,0), newTile(0,1), newTile(1,0)}),
+                    board.MoveFromTiles([]Tile {newTile(0,0), newTile(0,1), newTile(1,0), newTile(1, 1)})})
+  expColorMaskString = "12000 22000 00000 00000 00000"
+  if colorMask.ToString() != expColorMaskString {
+    t.Errorf("color mask is wrong", colorMask.ToString(), expColorMaskString)
+  }
+  if colorMask.Score(1) != 1 {
+    t.Errorf("wrong score for player 1", colorMask.Score(1), 1)
+  }
+  if colorMask.Score(2) != 3 {
+    t.Errorf("wrong score for player 2", colorMask.Score(2), 3)
+  }
+}
+
 func SetupBoard(board *Board) {
   board.Letters[0][0] = "h"
   board.Letters[0][1] = "e"

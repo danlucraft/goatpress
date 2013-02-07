@@ -187,19 +187,34 @@ func (board *Board) ToString() string {
 type ColorMask [][]int
 
 func newColorMask(b *Board, moves []Move) ColorMask {
-  colors := make([][]int, b.Size)
+  currColors := make([][]int, b.Size)
+  prevColors := make([][]int, b.Size)
   for i := 0; i < b.Size; i++ {
-    colors[i] = make([]int, b.Size)
+    currColors[i] = make([]int, b.Size)
+    prevColors[i] = make([]int, b.Size)
   }
+
+  curr := 0
+  prev := 1
+  boards := [][][]int{currColors, prevColors}
   moveCount := 0
   for _, move := range moves {
     player := (moveCount % 2) + 1
+    for i := 0; i < b.Size; i++ {
+      for j := 0; j < b.Size; j++ {
+        boards[curr][i][j] = boards[prev][i][j]
+      }
+    }
     for _, tile := range move.Tiles {
-      colors[tile.X()][tile.Y()] = player
+      x := tile.X()
+      y := tile.Y()
+      boards[curr][x][y] = player
     }
     moveCount += 1
+    curr = (curr + 1) % 2
+    prev = (prev + 1) % 2
   }
-  return ColorMask(colors)
+  return ColorMask(boards[prev])
 }
 
 func (cm *ColorMask) Score(player int) int {
