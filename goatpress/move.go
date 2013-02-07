@@ -2,6 +2,7 @@ package goatpress
 
 import (
   "fmt"
+  "strconv"
 )
 
 type Move struct {
@@ -21,6 +22,18 @@ func (move *Move) HasTile(tile Tile) bool {
     }
   }
   return false
+}
+
+func (move *Move) ToMessage() string {
+  tiles := ""
+  for i, tile := range move.Tiles {
+    tiles += strconv.FormatInt(int64(tile.X()), 16)
+    tiles += strconv.FormatInt(int64(tile.Y()), 16)
+    if i < len(move.Tiles) - 1 {
+      tiles += ","
+    }
+  }
+  return fmt.Sprintf("move:%s", tiles)
 }
 
 func (move *Move) ToString() string {

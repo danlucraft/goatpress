@@ -84,6 +84,14 @@ type Board struct {
   Letters [][]string
 }
 
+func newEmptyBoard(size int) Board {
+  board := Board{size, make([][]string, size)}
+  for i, _ := range board.Letters {
+    board.Letters[i] = make([]string, size)
+  }
+  return board
+}
+
 func (board *Board) MoveFromTiles(tiles []Tile) Move {
   word := ""
   isPass := (len(tiles) == 0)

@@ -7,6 +7,8 @@ import (
   "bufio"
   "time"
   "regexp"
+  "strings"
+  "strconv"
 )
 
 type Player interface {
@@ -145,6 +147,8 @@ func (p *ClientPlayer) Unregister() {
   p.unregister <- p.name
 }
 
+var moveFormat = regexp.MustCompile(`^move:([0-9][0-9],?)+$`)
+
 func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
   board := state.Board.ToString()
   colors := state.ColorString
@@ -169,6 +173,22 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
     return MakePassMove()
   }
   if data == "pass\n" {
+    return MakePassMove()
+  } else if moveFormat.MatchString(data) {
+    bits := strings.Split(data, ":")
+    moveString := bits[1]
+    tileStrings := strings.Split(moveString, ",")
+    tiles := make([]Tile, len(tileStrings))
+    for i, ts := range tileStrings {
+      xi, _ := strconv.ParseInt(string(ts[0]), 10, 0)
+      yi, _ := strconv.ParseInt(string(ts[1]), 10, 0)
+      tile := newTile(int(xi), int(yi))
+      tiles[i] = tile
+    }
+    move := state.Board.MoveFromTiles(tiles)
+    return move
+  } else {
+    p.writeLine("invalid: bad-format, passing ; ")
     return MakePassMove()
   }
   return MakePassMove()

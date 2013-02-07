@@ -6,6 +6,7 @@ import (
   "regexp"
   "bufio"
   "fmt"
+  "strings"
 )
 
 type Client struct {
@@ -56,20 +57,43 @@ func (c *Client) writeLine(req string) {
 
 var msgName    = regexp.MustCompile(`;\s+name ?`)
 var msgNewGame = regexp.MustCompile(`; new game`)
-var msgPlay    = regexp.MustCompile(`; move ([a-z 0-9])+ ?`)
+var msgPlay    = regexp.MustCompile(`; move ([a-z ])+ ([0-9 ])+ ?`)
 var msgPing    = regexp.MustCompile(`;\s+ping`)
 
+const size = 5
+
+func (c *Client) ParseGetMove(req string) Board {
+  bits := strings.Split(req, ";")
+  q := bits[1]
+  qbits := strings.Split(q, " ")
+  boardString := strings.Join(qbits[2:7], "")
+  board := newEmptyBoard(size)
+  for i, row := range board.Letters {
+    for j, _ := range row {
+      board.Letters[i][j] = string(boardString[i*size + j])
+    }
+  }
+  return board
+}
+
 func (c *Client) Run() {
+  moves := make([]Move, 0)
   c.readLine()
   for {
     req := c.readLine()
     if msgNewGame.MatchString(req) {
+      moves = make([]Move, 0)
     } else if msgName.MatchString(req) {
       c.writeLine(c.name)
     } else if msgPing.MatchString(req) {
       c.writeLine("pong")
     } else if msgPlay.MatchString(req) {
-      c.writeLine("pass")
+      board := c.ParseGetMove(req)
+      moveFinder := newRandomFinder(DefaultWordSet)
+      colorMask := newColorMask(&board, moves)
+      state := GameState{0, 0, 0, board, colorMask, colorMask.ToString(), moves}
+      move := moveFinder.GetMove(state)
+      c.writeLine(move.ToMessage())
     }
   }
 }
