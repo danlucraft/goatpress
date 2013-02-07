@@ -108,7 +108,7 @@ func TestColorMaskDarkTaking(t *testing.T) {
   colorMask := newColorMask(board,
                   []Move {
                     board.MoveFromTiles([]Tile {newTile(0,0), newTile(0,1), newTile(1,0)})})
-  expColorMaskString := "31000 10000 00000 00000 00000"
+  expColorMaskString := "11000 10000 00000 00000 00000"
   if colorMask.ToString() != expColorMaskString {
     t.Errorf("color mask is wrong", colorMask.ToString(), expColorMaskString)
   }

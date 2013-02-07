@@ -186,6 +186,29 @@ func (board *Board) ToString() string {
 
 type ColorMask [][]int
 
+func isNotPlayers(color int, player int) bool {
+  otherPlayer := (((player - 1) + 1) % 2) + 1
+  return color == 0 || color == otherPlayer
+}
+
+func isDark(b [][]int, player int, x int, y int) bool {
+  offsets := [][]int{              []int{-1,0}, 
+                     []int{0, -1}, []int{0, 0}, []int{0, 1},
+                                   []int{1, 0}}
+  size := len(b)
+
+  for _, offset := range offsets {
+    x1 := x + offset[0]
+    y1 := y + offset[1]
+    if x1 >= 0 && x1 < size && y1 >= 0 && y1 < size {
+      if isNotPlayers(b[x1][y1], player) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
 func newColorMask(b *Board, moves []Move) ColorMask {
   currColors := make([][]int, b.Size)
   prevColors := make([][]int, b.Size)
@@ -200,6 +223,7 @@ func newColorMask(b *Board, moves []Move) ColorMask {
   moveCount := 0
   for _, move := range moves {
     player := (moveCount % 2) + 1
+    otherPlayer := ((moveCount + 1) % 2) + 1
     for i := 0; i < b.Size; i++ {
       for j := 0; j < b.Size; j++ {
         boards[curr][i][j] = boards[prev][i][j]
@@ -208,7 +232,9 @@ func newColorMask(b *Board, moves []Move) ColorMask {
     for _, tile := range move.Tiles {
       x := tile.X()
       y := tile.Y()
-      boards[curr][x][y] = player
+      if !isDark(boards[prev], otherPlayer, x, y) {
+        boards[curr][x][y] = player
+      }
     }
     moveCount += 1
     curr = (curr + 1) % 2
@@ -221,7 +247,7 @@ func (cm *ColorMask) Score(player int) int {
   score := 0
   for _, row := range [][]int(*cm) {
     for _, c := range row {
-      if c == player {
+      if c == player || c == player + 2 {
         score++
       }
     }
