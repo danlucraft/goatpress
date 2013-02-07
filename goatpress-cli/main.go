@@ -12,6 +12,7 @@ func usage() {
 
 func main() {
   playerName := flag.String("name", "", "name")
+  tournamentFile := flag.String("file", "", "file")
   flag.Parse()
   fmt.Printf("command %s\n", flag.Args()[0])
   if len(flag.Args()) < 1 {
@@ -21,7 +22,7 @@ func main() {
     if command == "demo" {
       goatpress.Demo()
     } else if command == "server" {
-      goatpress.ServerStart()
+      goatpress.ServerStart(*tournamentFile)
     } else if command == "client" {
       fmt.Printf("Connecting as player %s\n", *playerName)
       goatpress.ClientStart(*playerName)

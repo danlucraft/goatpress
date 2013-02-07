@@ -17,15 +17,16 @@ var removePlayers = make(chan string)
 
 type Server struct {
   Tournament *Tournament
+  dataPath   string
 }
 var server *Server
 
-func newServer() *Server {
+func newServer(dataPath string) *Server {
   gameType := newGameType(5, DefaultWordSet)
-  tourney := newTournament(*gameType)
+  tourney := newTournament(*gameType, dataPath)
   randomPlayer := newInternalPlayer("Random", newRandomFinder(DefaultWordSet))
   tourney.RegisterPlayer(randomPlayer)
-  server = &Server{tourney}
+  server = &Server{tourney, dataPath}
   return server
 }
 
@@ -86,7 +87,9 @@ func (c *Server) RunTournament() {
     fmt.Printf("error listening:", err.Error())
     os.Exit(1)
   }
+  matchTicker := 0
   go AcceptPlayers(listener)
+
   for {
     select {
     case newPlayer := <-newPlayers:
@@ -99,12 +102,16 @@ func (c *Server) RunTournament() {
         c.Tournament.DeregisterPlayer(removePlayerName)
       }
     default:
+      for _, player := range c.Tournament.Players {
+        player.Ping()
+      }
       if c.Tournament.Size() > 1 {
         c.Tournament.PlayMatch()
-      } else {
-        for _, player := range c.Tournament.Players {
-          player.Ping()
+        matchTicker++
+        if matchTicker > 100 {
+          c.Tournament.Save()
         }
+      } else {
         time.Sleep(0.2*1e9)
       }
     }

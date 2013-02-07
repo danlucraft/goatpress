@@ -6,13 +6,14 @@ import (
   "encoding/json"
   "os"
   "strconv"
+  "io/ioutil"
 )
 
 type Tournament struct {
   GameType GameType
   Players  map[string]Player
   Matches  []Match
-  MatchLog *os.File
+  DataPath string
   Scores   Scores
   AllPlayerNames map[string]bool
 }
@@ -24,17 +25,30 @@ type Scores struct {
   Losses        map[string]int
 }
 
-func newTournament(gt GameType) *Tournament {
+func newTournament(gt GameType, dataPath string) *Tournament {
+  if dataPath == "" {
+    return blankTournament(gt, "")
+  }
+  if _, err := os.Stat(dataPath); os.IsNotExist(err) {
+    return blankTournament(gt, dataPath)
+  } else {
+    b, _ := ioutil.ReadFile(dataPath)
+    return unmarshalTournament(gt, b, dataPath)
+  }
+  return blankTournament(gt, dataPath)
+}
+
+func blankTournament(gt GameType, dataPath string) *Tournament {
   g := make(map[string]int)
   m := make(map[string]int)
   w := make(map[string]int)
   l := make(map[string]int)
   tm := Scores{g,m,w,l}
-  return newTournamentWithScores(gt, tm)
+  return newTournamentWithScores(gt, tm, dataPath)
 }
 
-func newTournamentWithScores(gt GameType, scores Scores) *Tournament {
-  return &Tournament{gt, make(map[string]Player), make([]Match, 0), nil, scores, make(map[string]bool)}
+func newTournamentWithScores(gt GameType, scores Scores, dataPath string) *Tournament {
+  return &Tournament{gt, make(map[string]Player), make([]Match, 0), dataPath, scores, make(map[string]bool)}
 }
 
 func (t *Tournament) RegisterPlayer(p Player) {
@@ -112,10 +126,10 @@ func (t *Tournament) Size() int {
   return len(t.Players)
 }
 
-func unmarshalTournament(gt GameType, bs []byte) *Tournament {
+func unmarshalTournament(gt GameType, bs []byte, dataPath string) *Tournament {
   var s Scores
   json.Unmarshal(bs, &s)
-  return newTournamentWithScores(gt, s)
+  return newTournamentWithScores(gt, s, dataPath)
 }
 
 func (t *Tournament) Marshal() []byte {
@@ -123,4 +137,9 @@ func (t *Tournament) Marshal() []byte {
   return b
 }
 
+func (t *Tournament) Save() {
+  if t.DataPath != "" {
+    ioutil.WriteFile(t.DataPath, t.Marshal(), 0644)
+  }
+}
 

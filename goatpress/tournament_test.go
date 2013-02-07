@@ -7,7 +7,7 @@ import (
 
 func TestNewTournament(t *testing.T) {
   gameType := newGameType(5, DefaultWordSet)
-  tourney := newTournament(*gameType)
+  tourney := newTournament(*gameType, "Asdfasdfasdf")
   if tourney.Size() != 0 {
     t.Errorf("fresh tournament has more than one player!")
   }

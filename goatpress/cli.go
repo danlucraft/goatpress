@@ -2,7 +2,7 @@ package goatpress
 
 func Demo() {
   gameType := newGameType(5, DefaultWordSet)
-  tourney := newTournament(*gameType)
+  tourney := newTournament(*gameType,"asdfasdfasdf")
   player1 := newInternalPlayer("Alice", newRandomFinder(DefaultWordSet))
   player2 := newInternalPlayer("Bob", newRandomFinder(DefaultWordSet))
 
@@ -12,8 +12,8 @@ func Demo() {
   tourney.PlayMatch()
 }
 
-func ServerStart() {
-  server := newServer()
+func ServerStart(dataPath string) {
+  server := newServer(dataPath)
   server.Run()
 }
 
