@@ -21,7 +21,9 @@ func (m *Match) Play() {
   }
   m.played = true
   players  := [2]Player {m.Player1, m.Player2}
-  messages := [2]int {MSG_NONE, MSG_NONE}
+  messages := [2]int {MSG_NONE, MSG_OPPONENT_MOVE}
+  lastMoves := [2]Move {MakePassMove(), MakePassMove()}
+  move      := MakePassMove()
   m.Player1.NewGame(m.Game.CurrentGameState())
   m.Player2.NewGame(m.Game.CurrentGameState())
 
@@ -31,13 +33,17 @@ func (m *Match) Play() {
 
     response := MOVE_UNMADE
     i := 0
-    move := MakePassMove()
+    move = MakePassMove()
     for i < 100 && response != MOVE_OK { // should have limit on number of invalid moves?
-      move = thisPlayer.GetMove(messages[playerIx], "", m.Game.CurrentGameState())
+      lastOpponentMove := lastMoves[(playerIx + 1) % 2]
+      lastOpponentMoveMessage := ""
+      lastOpponentMoveMessage = lastOpponentMove.ToMessage()
+      move = thisPlayer.GetMove(messages[playerIx], lastOpponentMoveMessage, m.Game.CurrentGameState())
       response = m.Game.Move(move)
       switch response {
       case MOVE_OK:
         messages[playerIx] = MSG_OPPONENT_MOVE
+        lastMoves[playerIx] = move
       case MOVE_ALREADY_PLAYED:
         messages[playerIx] = MSG_BAD_MOVE_ALREADY
       case MOVE_PREFIX_WORD:
@@ -56,7 +62,7 @@ func (m *Match) Play() {
     }
     colorMask := m.Game.ColorMask()
     colorString := colorMask.ToString()
-    fmt.Printf("MOVE player: %s, move: %s, colors:%s\n", thisPlayer.Name(), move.ToString(), colorString)
+    fmt.Printf("   move player: %s, move: %s, colors:%s\n", thisPlayer.Name(), move.ToString(), colorString)
   }
 }
 

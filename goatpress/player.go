@@ -163,12 +163,13 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
   var bit1 string
   switch msg {
     case MSG_NONE:               bit1 = ""
+    case MSG_BAD_MOVE_ALREADY:   bit1 = "invalid: already"
     case MSG_BAD_MOVE_UNKNOWN:   bit1 = "invalid: unknown"
     case MSG_BAD_MOVE_PREFIX:    bit1 = "invalid: prefix"
     case MSG_BAD_MOVE_TOO_SHORT: bit1 = "invalid: too-short"
     case MSG_OPPONENT_MOVE:      bit1 = "opponent: " + info
   }
-  req := bit1 + " ; move " + board + " " + colors + " ?\n"
+  req := bit1 + " ; move " + board + " " + colors + " ?"
   err1 := p.writeLine(req)
   if err1 != nil {
     fmt.Printf("%s passes due to closed connection\n", p.name)
