@@ -88,7 +88,7 @@ func newClientPlayer(conn net.Conn, unregister chan string) *ClientPlayer {
 }
 
 func (p *ClientPlayer) NewGame(_ GameState) {
-  p.writeLine("; new game")
+  p.writeLine("new game ;")
 }
 
 func (p *ClientPlayer) Name() string {

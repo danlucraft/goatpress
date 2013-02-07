@@ -56,7 +56,7 @@ func (c *Client) writeLine(req string) {
 }
 
 var msgName    = regexp.MustCompile(`;\s+name ?`)
-var msgNewGame = regexp.MustCompile(`; new game`)
+var msgNewGame = regexp.MustCompile(`new game`)
 var msgPlay    = regexp.MustCompile(`; move ([a-z ])+ ([0-9 ])+ ?`)
 var msgPing    = regexp.MustCompile(`;\s+ping`)
 

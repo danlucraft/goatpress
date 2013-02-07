@@ -40,6 +40,10 @@
     margin: 0;
   }
 
+  .docs {
+    text-align: left;
+  }
+
 </style>
 <h1>Goatpress</h1>
 
@@ -70,4 +74,29 @@
 <br/>
 <br/>
 <h2>Matchoff Table</h2>
+
+<h2>Docs</h2>
+
+<div class=docs>
+  <p>The Letterpress TCP server is available at <code>of1-dev-dan:4123</code>. 
+  It uses a adhoc, custom, ghetto ascii protocol.</p>
+  <p><b>Server messages</b> The message format looks like this:</p>
+  <pre><code>[INFO] ; [QUESTION ?] \n</code></pre>
+  <p>A board looks like this: <code>nnaou mkhuu ifnfg baurn cruil</code></p>
+  <p><b>Responses</b>
+  <p>If you are asked a question you must respond.
+  Your response should terminate with a newline:</p>
+  <ul>
+    <li><b>Name?</b> Reply with your players name (with ruby variable naming rules)</li>
+    <li><b>Ping?</b> Reply with <code>pong</code></li>
+    <li><b>Move?</b> Reply with <code>move:43,12,31</code> meaning, in the case of the example board above, "iha",
+    or alternatively <code>pass</code>.</li>
+  </ul>
+  <p>A badly formatted reply to a move question is an automatic pass.<br />
+  A badly formatted reply to a pong question is an automatic disconnection.</p>
+  <p><b>Hints</b> Telnet works</p>
+</div>
+
+
+
 
