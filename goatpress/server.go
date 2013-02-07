@@ -5,6 +5,7 @@ import (
   "os"
   "fmt"
   "time"
+  "net/http"
 )
 
 const serverAddress = "localhost:4123"
@@ -25,6 +26,20 @@ func newServer() *Server {
 }
 
 func (c *Server) Run() {
+  go c.RunWeb()
+  c.RunTournament()
+}
+
+func homePage(w http.ResponseWriter, r *http.Request) {
+  fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+}
+
+func (c *Server) RunWeb() {
+  http.HandleFunc("/", homePage)
+  http.ListenAndServe(":5123", nil)
+}
+
+func (c *Server) RunTournament() {
   listener, err := net.Listen("tcp", serverAddress)
   if err != nil {
     fmt.Printf("error listening:", err.Error())
