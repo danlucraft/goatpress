@@ -1,0 +1,72 @@
+
+<style>
+  html {
+    background-color: #ECEBE6;
+  }
+  body {
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    padding: 20px;
+    padding-top: 50px;
+    font-family: "Helvetica Neue";
+    background-color: white;
+    border-right: 10px solid #ddd;
+  }
+  h1 {
+    color: #1B8DFA;
+    font-size: 3em;
+  }
+  h2 {
+    color: #F72923;
+  }
+  p {
+    padding: 5px;
+  }
+
+  table {
+  }
+  tr.header td {
+    border-bottom: 1px solid black;
+  }
+  td.name {
+    font-weight: bold;
+  }
+  td {
+    width: 100px;
+    padding: 5px;
+    margin: 0;
+  }
+
+</style>
+<h1>Goatpress</h1>
+
+<h2>Score Table</h2>
+<table>
+  <tr class=header>
+    <td>Name</td>
+    <td>Score</td>
+    <td>Games</td>
+    <td>Moves</td>
+    <td>Wins</td>
+    <td>Draws</td>
+    <td>Losses</td>
+  </td>
+  {{range .Players}}
+    <tr>
+      <td class=name>{{.Name}}</td>
+      <td>{{.Score}}</td>
+      <td>{{.Games}}</td>
+      <td>{{.Moves}}</td>
+      <td>{{.Wins}}</td>
+      <td>{{.Draws}}</td>
+      <td>{{.Losses}}</td>
+    </tr>
+  {{end}}
+</table>
+
+<br/>
+<br/>
+<h2>Matchoff Table</h2>
+

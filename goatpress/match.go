@@ -16,6 +16,7 @@ func newMatch(gt *GameType, p1 Player, p2 Player) *Match {
   return &Match{gt.NewGame(), p1, p2, false}
 }
 
+
 func (m *Match) Play() {
   if m.played {
     return
@@ -27,6 +28,7 @@ func (m *Match) Play() {
   move      := MakePassMove()
   m.Player1.NewGame(m.Game.CurrentGameState())
   m.Player2.NewGame(m.Game.CurrentGameState())
+  moveCount := 0
 
   for m.Game.WhoseMove() != 0 {
     playerIx := m.Game.WhoseMove() - 1
@@ -43,6 +45,7 @@ func (m *Match) Play() {
       response = m.Game.Move(move)
       switch response {
       case MOVE_OK:
+        moveCount++
         messages[playerIx] = MSG_OPPONENT_MOVE
         lastMoves[playerIx] = move
       case MOVE_ALREADY_PLAYED:

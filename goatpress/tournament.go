@@ -14,6 +14,7 @@ type Tournament struct {
   Matches  []Match
   MatchLog *os.File
   Scores   Scores
+  AllPlayerNames map[string]bool
 }
 
 type Scores struct {
@@ -33,13 +34,14 @@ func newTournament(gt GameType) *Tournament {
 }
 
 func newTournamentWithScores(gt GameType, scores Scores) *Tournament {
-  return &Tournament{gt, make(map[string]Player), make([]Match, 0), nil, scores}
+  return &Tournament{gt, make(map[string]Player), make([]Match, 0), nil, scores, make(map[string]bool)}
 }
 
 func (t *Tournament) RegisterPlayer(p Player) {
   if _, present := t.Players[p.Name()]; present {
     return
   }
+  t.AllPlayerNames[p.Name()] = true
   t.Players[p.Name()] = p
 }
 

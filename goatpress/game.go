@@ -92,6 +92,8 @@ func (game *Game) IsWordPlayedPrefix(word string) bool {
   return false
 }
 
+const maxMoves = 100
+
 // 0 game over
 // 1 player 1
 // 2 player 2
@@ -99,6 +101,9 @@ func (game *Game) WhoseMove() int {
   if game.UncoloredSquareCount() == 0 { return 0 }
   l := len(game.Moves)
   if l > 1 && game.Moves[l-2].IsPass && game.Moves[l-1].IsPass {
+    return 0
+  }
+  if l > maxMoves {
     return 0
   }
   return (len(game.Moves) % 2) + 1
