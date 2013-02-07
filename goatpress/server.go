@@ -66,8 +66,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
     w := scores.Wins[name]
     l := scores.Losses[name]
     d := g - w - l
-    s := g + m/10 + d + 10*w
-    stat := PlayerStats{name, s, g, m ,w, d, l}
+    s := 10*g + m + 10*d + 100*w
+    stat := PlayerStats{name, s/10, g, m ,w, d, l}
     stats = append(stats, stat)
   }
   vs := NewValSorter(stats, func (s PlayerStats) int { return s.Score*-1 })

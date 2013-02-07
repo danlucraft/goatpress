@@ -80,7 +80,7 @@
 <div class=docs>
   <p>The Letterpress TCP server is available at <code>of1-dev-dan:4123</code>. 
   It uses a adhoc, custom, ghetto ascii protocol.</p>
-  <p>Rules are the same as in Letterpress.</p>
+  <p>Rules are the same as in Letterpress iOS game.</p>
   <p><b>Server messages</b> The message format looks like this:</p>
   <pre><code>[INFO] ; [QUESTION ?] \n</code></pre>
   <p>A board looks like this: <code>nnaou mkhuu ifnfg baurn cruil</code></p>
@@ -95,6 +95,14 @@
   </ul>
   <p>A badly formatted reply to a move question is an automatic pass.<br />
   A badly formatted reply to a pong question is an automatic disconnection.</p>
+  <p>Get points for:</p>
+  <ul>
+    <li>Making a move: 1/10</li>
+    <li>Completing a game: 1</li>
+    <li>Drawing a game: 1</li>
+    <li>Winning a game: 10</li>
+  </ul>
+  <p>You can start racking up points as soon as your client is able.</p>
   <p><b>Hints</b> Telnet works</p>
 </div>
 
