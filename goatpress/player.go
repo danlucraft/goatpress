@@ -107,9 +107,10 @@ func (p *ClientPlayer) Ping() bool {
 }
 
 func (p *ClientPlayer) writeLine(req string) error {
-  //p.conn.SetWriteDeadline(oneSecondAway())
+  p.conn.SetWriteDeadline(oneSecondAway())
   _, err := p.conn.Write([]byte(req + "\n"))
   if err != nil {
+    fmt.Println(err)
     go p.Unregister()
     return errors.New("client closed connection on write")
   }
@@ -126,15 +127,14 @@ func ValidateName(name string) bool {
 func oneSecondAway() time.Time {
   t := time.Now()
   d, _ := time.ParseDuration("1s")
-  t.Add(d)
-  return t
+  return t.Add(d)
 }
 
 func (p ClientPlayer) readLine() (string, error) {
-  //p.conn.SetReadDeadline(oneSecondAway())
+  p.conn.SetReadDeadline(oneSecondAway())
   b, err := p.reader.ReadBytes('\n')
   if err != nil {
-    //println("client closed connection on read")
+    fmt.Println(err)
     go p.Unregister()
     return "", errors.New("client closed connection")
   }
@@ -152,6 +152,7 @@ func (p ClientPlayer) readLine() (string, error) {
 }
 
 func (p *ClientPlayer) Unregister() {
+  p.conn.Close()
   p.unregister <- p.name
 }
 

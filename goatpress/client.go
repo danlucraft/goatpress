@@ -93,6 +93,7 @@ func (c *Client) Run() {
       colorMask := newColorMask(&board, moves)
       state := GameState{0, 0, 0, board, colorMask, colorMask.ToString(), moves}
       move := moveFinder.GetMove(state)
+      //time.Sleep(2e9)
       c.writeLine(move.ToMessage())
     }
   }
