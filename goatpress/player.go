@@ -4,6 +4,7 @@ import (
   "net"
   "fmt"
   "errors"
+  "bufio"
 )
 
 type Player interface {
@@ -46,12 +47,31 @@ type ClientPlayer struct {
   name       string
   conn       net.Conn
   unregister chan string
+  reader     *bufio.Reader
 }
 
 type ClientMessage struct {
   msgType int
   info    string
   request string
+}
+
+func newClientPlayer(conn net.Conn, unregister chan string) *ClientPlayer {
+  p := &ClientPlayer{"", conn, unregister, bufio.NewReader(conn)}
+  for p.name == "" {
+    err := p.writeLine("; name ?")
+    if err != nil {
+      return nil
+    }
+    str, err2 := p.readLine()
+    if err2 != nil {
+      return nil
+    }
+    if len(str) > 0 {
+      p.name = str
+    }
+  }
+  return p
 }
 
 func (p *ClientPlayer) NewGame(_ GameState) {
@@ -63,7 +83,7 @@ func (p *ClientPlayer) Name() string {
   return p.name
 }
 
-func (p *ClientPlayer) writeString(req string) error {
+func (p *ClientPlayer) writeLine(req string) error {
   _, err := p.conn.Write([]byte(req))
   if err != nil {
     go p.Unregister()
@@ -73,38 +93,19 @@ func (p *ClientPlayer) writeString(req string) error {
   return nil
 }
 
-func (p ClientPlayer) readString() (string, error) {
-  buf := make([]byte, 1024)
-  n, err := p.conn.Read(buf)
+func (p ClientPlayer) readLine() (string, error) {
+  b, err := p.reader.ReadBytes('\n')
   if err != nil {
     go p.Unregister()
     return "", errors.New("client closed connection")
   }
-  data := string(buf[0:n])
-  fmt.Printf("%s< %s\n", p.Name(), data[0:len(data)-1])
-  return data, nil
+  line := string(b[0:len(b)-1])
+  fmt.Printf("%s< %s\n", p.Name(), line)
+  return line, nil
 }
 
 func (p *ClientPlayer) Unregister() {
   p.unregister <- p.name
-}
-
-func newClientPlayer(conn net.Conn, unregister chan string) *ClientPlayer {
-  p := &ClientPlayer{"", conn, unregister}
-  for p.name == "" {
-    err := p.writeString("; name ?\n")
-    if err != nil {
-      return nil
-    }
-    str, err2 := p.readString()
-    if err2 != nil {
-      return nil
-    }
-    if len(str) > 1 && string(str[len(str)-1]) == "\n" {
-      p.name = str[0:len(str)-1]
-    }
-  }
-  return p
 }
 
 func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
@@ -119,18 +120,20 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
     case MSG_OPPONENT_MOVE:      bit1 = "opponent: " + info
   }
   req := bit1 + " ; move " + board + " " + colors + " ?\n"
-  err1 := p.writeString(req)
+  err1 := p.writeLine(req)
   if err1 != nil {
     fmt.Printf("%s passes due to closed connection\n", p.name)
     return MakePassMove()
   }
 
-  data, err2 := p.readString()
+  data, err2 := p.readLine()
   if err2 != nil {
     fmt.Printf("%s passes due to closed connection\n", p.name)
     return MakePassMove()
   }
-  println(data)
+  if data == "pass\n" {
+    return MakePassMove()
+  }
   return MakePassMove()
 }
 
