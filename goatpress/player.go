@@ -6,6 +6,7 @@ import (
   "errors"
   "bufio"
   "time"
+  "regexp"
 )
 
 type Player interface {
@@ -73,16 +74,19 @@ func newClientPlayer(conn net.Conn, unregister chan string) *ClientPlayer {
     if err2 != nil {
       return nil
     }
-    if len(str) > 0 {
+    if ValidateName(str) {
       p.name = str
+    } else {
+      p.writeLine("invalid name")
+      conn.Close()
+      return nil
     }
   }
   return p
 }
 
 func (p *ClientPlayer) NewGame(_ GameState) {
-  req := "; new game \n"
-  p.conn.Write([]byte(req))
+  p.writeLine("; new game")
 }
 
 func (p *ClientPlayer) Name() string {
@@ -109,6 +113,12 @@ func (p *ClientPlayer) writeLine(req string) error {
   }
   fmt.Printf("%s> %s\n", p.Name(), req)
   return nil
+}
+
+var nameValidate = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9]*$`)
+
+func ValidateName(name string) bool {
+  return nameValidate.MatchString(name)
 }
 
 func oneSecondAway() time.Time {
