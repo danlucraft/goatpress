@@ -4,9 +4,11 @@ import (
   "io/ioutil"
   "strings"
   "math/rand"
+  "runtime"
+  "path"
 )
 
-const defaultDataPath string = "/Users/dan/Dropbox/projects/go/src/goatpress/data/words"
+const defaultDataPath string = "data/words"
 
 // *** WordSet
 
@@ -26,10 +28,12 @@ func newWordSet() *HashWordSet {
   return &HashWordSet{make(map[string]bool), make([]string, 0)}
 }
 
-var DefaultWordSet = newWordSetFromFile(defaultDataPath)
+var DefaultWordSet = defaultWordSet()
 
 func defaultWordSet() *HashWordSet {
-  return newWordSetFromFile(defaultDataPath)
+  _, filename, _, _ := runtime.Caller(1)
+  path := path.Join(path.Dir(filename), defaultDataPath)
+  return newWordSetFromFile(path)
 }
 
 func newWordSetFromFile(path string) *HashWordSet {
