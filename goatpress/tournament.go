@@ -23,6 +23,7 @@ type Scores struct {
   Moves         map[string]int
   Wins          map[string]int
   Losses        map[string]int
+  WinProduct    map[string]int
 }
 
 func newTournament(gt GameType, dataPath string) *Tournament {
@@ -43,7 +44,8 @@ func blankTournament(gt GameType, dataPath string) *Tournament {
   m := make(map[string]int)
   w := make(map[string]int)
   l := make(map[string]int)
-  tm := Scores{g,m,w,l}
+  tb := make(map[string]int)
+  tm := Scores{g,m,w,l,tb}
   return newTournamentWithScores(gt, tm, dataPath)
 }
 
@@ -97,10 +99,12 @@ func (t *Tournament) PlayMatch() {
     } else if winnerIx == 1 {
       t.Scores.Wins[name1] += 1
       t.Scores.Losses[name2] += 1
+      t.Scores.WinProduct[name1 + ">" + name2] += 1
       fmt.Printf("Winner was %s\n", player1.Name())
     } else if winnerIx == 2 {
       t.Scores.Wins[name2] += 1
       t.Scores.Losses[name1] += 1
+      t.Scores.WinProduct[name2 + ">" + name1] += 1
       fmt.Printf("Winner was %s\n", player2.Name())
     }
   }
@@ -133,7 +137,11 @@ func unmarshalTournament(gt GameType, bs []byte, dataPath string) *Tournament {
 }
 
 func (t *Tournament) Marshal() []byte {
-  b, _ := json.Marshal(t.Scores)
+  b, err := json.Marshal(t.Scores)
+  if err != nil {
+    fmt.Println(err)
+    os.Exit(1)
+  }
   return b
 }
 

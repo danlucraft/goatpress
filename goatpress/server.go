@@ -72,7 +72,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
   }
   vs := NewValSorter(stats, func (s PlayerStats) int { return s.Score*-1 })
   vs.Sort()
-  
   t.Execute(w, &HomePage{pc, vs.Keys})
 }
 
@@ -110,6 +109,7 @@ func (c *Server) RunTournament() {
         matchTicker++
         if matchTicker > 100 {
           c.Tournament.Save()
+          matchTicker = 0
         }
       } else {
         time.Sleep(0.2*1e9)
