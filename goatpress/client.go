@@ -31,44 +31,49 @@ func newClient(name string) *Client {
   return &Client{name, conn, bufio.NewReader(conn)}
 }
 
-func (c *Client) readLine() (string,error) {
+func (c *Client) readLine() string {
   if b, err := c.reader.ReadBytes('\n'); err != nil {
-    return "", err
+    println(err)
+    println("server went away on read")
+    os.Exit(0)
   } else {
-    return string(b[0:len(b)-1]), nil
+    line := string(b[0:len(b)-1])
+    fmt.Printf("< %s\n", line)
+    return line
   }
-  return "", nil
+  return ""
 }
 
-var msgNewGame = regexp.MustCompile(`new game`)
+func (c *Client) writeLine(req string) {
+  _, err := c.conn.Write([]byte(req + "\n"))
+  if err != nil {
+    println(err)
+    println("server went away on write")
+    os.Exit(0)
+  }
+  fmt.Printf("> %s\n", req)
+}
+
+var msgName    = regexp.MustCompile(`;\s+name ?`)
+var msgNewGame = regexp.MustCompile(`; new game`)
 var msgPlay    = regexp.MustCompile(`; move ([a-z 0-9])+ ?`)
+var msgPing    = regexp.MustCompile(`;\s+ping`)
 
 func (c *Client) Run() {
-  version, err := c.readLine()
-  if err != nil {
-    println("couldn't read initial version string")
-    os.Exit(1)
-  }
-  println("version: ", version)
-  c.conn.Write([]byte(c.name + "\n"))
+  c.readLine()
   for {
-    req, err := c.readLine()
-    if err != nil {
-      println("server went away")
-      os.Exit(0)
-    }
-    println("server said: ", req)
+    req := c.readLine()
     if msgNewGame.MatchString(req) {
-      println("received new game notification")
+    } else if msgName.MatchString(req) {
+      c.writeLine(c.name)
+    } else if msgPing.MatchString(req) {
+      c.writeLine("pong")
     } else if msgPlay.MatchString(req) {
-      println("play request: sending pass move")
-      n, err := c.conn.Write([]byte("pass\n"))
-      fmt.Printf("wrote %d bytes\n", n)
-      if err != nil {
-        fmt.Printf("error writing pass\n")
-      }
+      c.writeLine("pass")
     }
   }
 }
+
+
 
 

@@ -43,6 +43,11 @@ func (c *Server) Run() {
     default:
       if c.Tournament.Size() > 1 {
         c.Tournament.PlayMatch()
+      } else {
+        for _, player := range c.Tournament.Players {
+          player.Ping()
+        }
+        time.Sleep(0.2*1e9)
       }
     }
     time.Sleep(1)
