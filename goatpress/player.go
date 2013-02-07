@@ -113,7 +113,7 @@ func (p *ClientPlayer) writeLine(req string) error {
     go p.Unregister()
     return errors.New("client closed connection on write")
   }
-  fmt.Printf("%s> %s\n", p.Name(), req)
+  //fmt.Printf("%s> %s\n", p.Name(), req)
   return nil
 }
 
@@ -134,7 +134,7 @@ func (p ClientPlayer) readLine() (string, error) {
   //p.conn.SetReadDeadline(oneSecondAway())
   b, err := p.reader.ReadBytes('\n')
   if err != nil {
-    println("client closed connection on read")
+    //println("client closed connection on read")
     go p.Unregister()
     return "", errors.New("client closed connection")
   }
@@ -147,7 +147,7 @@ func (p ClientPlayer) readLine() (string, error) {
     b = b[0:len(b)-1]
   }
   line := string(b[0:len(b)])
-  fmt.Printf("%s< %s\n", p.Name(), line)
+  //fmt.Printf("%s< %s\n", p.Name(), line)
   return line, nil
 }
 
@@ -172,13 +172,13 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
   req := bit1 + " ; move " + board + " " + colors + " ?"
   err1 := p.writeLine(req)
   if err1 != nil {
-    fmt.Printf("%s passes due to closed connection\n", p.name)
+    //fmt.Printf("%s passes due to closed connection\n", p.name)
     return MakePassMove()
   }
 
   data, err2 := p.readLine()
   if err2 != nil {
-    fmt.Printf("%s passes due to closed connection\n", p.name)
+    //fmt.Printf("%s passes due to closed connection\n", p.name)
     return MakePassMove()
   }
   if data == "pass\n" {
@@ -203,4 +203,6 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
   return MakePassMove()
 }
 
-
+func dummyFtm() {
+  fmt.Printf("")
+}

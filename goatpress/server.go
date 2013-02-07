@@ -50,6 +50,7 @@ func (c *Server) Run() {
         time.Sleep(0.2*1e9)
       }
     }
+    fmt.Printf("Players: %s\n", c.Tournament.PlayerList())
     time.Sleep(1)
   }
 }

@@ -4,16 +4,19 @@ import (
   "math/rand"
   "fmt"
   "encoding/json"
+  "os"
+  "strconv"
 )
 
 type Tournament struct {
   GameType GameType
   Players  map[string]Player
   Matches  []Match
+  MatchLog *os.File
 }
 
 func newTournament(gt GameType) *Tournament {
-  return &Tournament{gt, make(map[string]Player), make([]Match, 0)}
+  return &Tournament{gt, make(map[string]Player), make([]Match, 0), nil}
 }
 
 func (t *Tournament) RegisterPlayer(p Player) {
@@ -25,6 +28,16 @@ func (t *Tournament) RegisterPlayer(p Player) {
 
 func (t *Tournament) DeregisterPlayer(name string) {
   delete(t.Players, name)
+}
+
+func (t *Tournament) PlayerList() string {
+  s := ""
+  for name, _ := range t.Players {
+    s += name + " ("
+    s += strconv.Itoa(t.ScoreFor(name))
+    s += "), "
+  }
+  return s
 }
 
 func (t *Tournament) PlayMatch() {

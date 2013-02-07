@@ -2,6 +2,7 @@ package goatpress
 
 import (
   "fmt"
+  "encoding/json"
 )
 
 type Match struct {
@@ -60,9 +61,9 @@ func (m *Match) Play() {
       move = MakePassMove()
       m.Game.Move(move)
     }
-    colorMask := m.Game.ColorMask()
-    colorString := colorMask.ToString()
-    fmt.Printf("   move player: %s, move: %s, colors:%s\n", thisPlayer.Name(), move.ToString(), colorString)
+    //colorMask := m.Game.ColorMask()
+    //colorString := colorMask.ToString()
+    //fmt.Printf("   move player: %s, move: %s, colors:%s\n", thisPlayer.Name(), move.ToString(), colorString)
   }
 }
 
@@ -87,6 +88,11 @@ type MatchMarshaller struct {
 func (m *Match) Marshaller() MatchMarshaller {
   mm := MatchMarshaller{m.Player1.Name(), m.Player2.Name(), m.Game.Marshaller()}
   return mm
+}
+
+func (m *Match) Marshal() []byte {
+  b, _ := json.Marshal(m.Marshaller())
+  return b
 }
 
 func dummyForFmt() {
