@@ -13,10 +13,27 @@ type Tournament struct {
   Players  map[string]Player
   Matches  []Match
   MatchLog *os.File
+  Scores   Scores
+}
+
+type Scores struct {
+  Games         map[string]int
+  Moves         map[string]int
+  Wins          map[string]int
+  Losses        map[string]int
 }
 
 func newTournament(gt GameType) *Tournament {
-  return &Tournament{gt, make(map[string]Player), make([]Match, 0), nil}
+  g := make(map[string]int)
+  m := make(map[string]int)
+  w := make(map[string]int)
+  l := make(map[string]int)
+  tm := Scores{g,m,w,l}
+  return newTournamentWithScores(gt, tm)
+}
+
+func newTournamentWithScores(gt GameType, scores Scores) *Tournament {
+  return &Tournament{gt, make(map[string]Player), make([]Match, 0), nil, scores}
 }
 
 func (t *Tournament) RegisterPlayer(p Player) {
@@ -51,12 +68,23 @@ func (t *Tournament) PlayMatch() {
     match := newMatch(&t.GameType, player1, player2)
     t.Matches = append(t.Matches, *match)
     match.Play()
+
+    name1 := player1.Name()
+    name2 := player2.Name()
+    t.Scores.Games[name1] += 1
+    t.Scores.Games[name2] += 1
+    t.Scores.Moves[name1] += len(match.Game.Moves)
+    t.Scores.Moves[name2] += len(match.Game.Moves)
     winnerIx := match.Winner()
     if winnerIx == 0 {
       fmt.Printf("DRAW\n")
     } else if winnerIx == 1 {
+      t.Scores.Wins[name1] += 1
+      t.Scores.Losses[name2] += 1
       fmt.Printf("Winner was %s\n", player1.Name())
     } else if winnerIx == 2 {
+      t.Scores.Wins[name2] += 1
+      t.Scores.Losses[name1] += 1
       fmt.Printf("Winner was %s\n", player2.Name())
     }
   }
@@ -75,53 +103,22 @@ func (t *Tournament) RandomPlayer() Player {
 }
 
 func (t *Tournament) ScoreFor(name string) int {
-  score := 0
-  for _, match := range t.Matches {
-    if match.Winner() == 1 {
-      if match.Player1.Name() == name {
-        score += 3
-      }
-    } else if match.Winner() == 2 {
-      if match.Player2.Name() == name {
-        score += 3
-      }
-    } else {
-      score += 1
-    }
-  }
-  return score
+  return t.Scores.Wins[name]
 }
 
 func (t *Tournament) Size() int {
   return len(t.Players)
 }
 
-type TournamentMarshaller struct {
-  Matches []MatchMarshaller
-  Count int
-}
-
-func unmarshalTournament(bs []byte) Tournament {
-  var t Tournament
-  json.Unmarshal(bs, &t)
-  return t
+func unmarshalTournament(gt GameType, bs []byte) *Tournament {
+  var s Scores
+  json.Unmarshal(bs, &s)
+  return newTournamentWithScores(gt, s)
 }
 
 func (t *Tournament) Marshal() []byte {
-  mms := make([]MatchMarshaller, len(t.Matches))
-  for _, match := range t.Matches {
-    mms = append(mms, match.Marshaller())
-  }
-
-  tm := TournamentMarshaller{mms, len(t.Matches)}
-  b, _ := json.Marshal(tm)
+  b, _ := json.Marshal(t.Scores)
   return b
 }
-
-
-
-
-
-
 
 

@@ -19,6 +19,8 @@ type Server struct {
 func newServer() *Server {
   gameType := newGameType(5, DefaultWordSet)
   tourney := newTournament(*gameType)
+  randomPlayer := newInternalPlayer("Random", newRandomFinder(DefaultWordSet))
+  tourney.RegisterPlayer(randomPlayer)
   return &Server{tourney}
 }
 
