@@ -7,6 +7,7 @@ import (
   "bufio"
   "fmt"
   "strings"
+  //"time"
 )
 
 type Client struct {
@@ -15,9 +16,10 @@ type Client struct {
   reader *bufio.Reader
 }
 
-func newClient(name string) *Client {
-  servAddr := "localhost:4123"
-  tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
+func newClient(name string, serverPort int) *Client {
+  address := serverAddress + fmt.Sprintf(":%d", serverPort)
+  println(address)
+  tcpAddr, err := net.ResolveTCPAddr("tcp", address)
   if err != nil {
     println("ResolveTCPAddr failed:", err.Error())
     os.Exit(1)
@@ -93,7 +95,6 @@ func (c *Client) Run() {
       colorMask := newColorMask(&board, moves)
       state := GameState{0, 0, 0, board, colorMask, colorMask.ToString(), moves}
       move := moveFinder.GetMove(state)
-      //time.Sleep(2e9)
       c.writeLine(move.ToMessage())
     }
   }

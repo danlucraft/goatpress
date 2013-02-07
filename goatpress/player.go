@@ -57,6 +57,8 @@ type ClientPlayer struct {
   conn       net.Conn
   unregister chan string
   reader     *bufio.Reader
+  clientTimeout string
+  closed     bool
 }
 
 type ClientMessage struct {
@@ -65,8 +67,8 @@ type ClientMessage struct {
   request string
 }
 
-func newClientPlayer(conn net.Conn, unregister chan string) *ClientPlayer {
-  p := &ClientPlayer{"", conn, unregister, bufio.NewReader(conn)}
+func newClientPlayer(conn net.Conn, unregister chan string, clientTimeout string) *ClientPlayer {
+  p := &ClientPlayer{"", conn, unregister, bufio.NewReader(conn), clientTimeout, false}
   for p.name == "" {
     err := p.writeLine("; name ?")
     if err != nil {
@@ -107,7 +109,10 @@ func (p *ClientPlayer) Ping() bool {
 }
 
 func (p *ClientPlayer) writeLine(req string) error {
-  p.conn.SetWriteDeadline(oneSecondAway())
+  if p.closed {
+    return errors.New("closed")
+  }
+  p.conn.SetWriteDeadline(p.deadline())
   _, err := p.conn.Write([]byte(req + "\n"))
   if err != nil {
     fmt.Println(err)
@@ -124,14 +129,17 @@ func ValidateName(name string) bool {
   return nameValidate.MatchString(name)
 }
 
-func oneSecondAway() time.Time {
+func (p ClientPlayer) deadline() time.Time {
   t := time.Now()
-  d, _ := time.ParseDuration("1s")
+  d, _ := time.ParseDuration("10s")
   return t.Add(d)
 }
 
 func (p ClientPlayer) readLine() (string, error) {
-  p.conn.SetReadDeadline(oneSecondAway())
+  if p.closed {
+    return "", errors.New("closed")
+  }
+  p.conn.SetReadDeadline(p.deadline())
   b, err := p.reader.ReadBytes('\n')
   if err != nil {
     fmt.Println(err)
@@ -152,7 +160,9 @@ func (p ClientPlayer) readLine() (string, error) {
 }
 
 func (p *ClientPlayer) Unregister() {
+  p.writeLine("unregistering for \"reasons\"")
   p.conn.Close()
+  p.closed = true
   p.unregister <- p.name
 }
 
@@ -182,7 +192,7 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
     //fmt.Printf("%s passes due to closed connection\n", p.name)
     return MakePassMove()
   }
-  if data == "pass\n" {
+  if data == "pass" {
     return MakePassMove()
   } else if moveFormat.MatchString(data) {
     bits := strings.Split(data, ":")
@@ -198,6 +208,7 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
     move := state.Board.MoveFromTiles(tiles)
     return move
   } else {
+    println("bad data '", data, "'")
     p.writeLine("invalid: bad-format, passing ; ")
     return MakePassMove()
   }

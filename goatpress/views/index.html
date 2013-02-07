@@ -74,7 +74,17 @@
 <br/>
 <br/>
 <h2>Matchoff Table</h2>
-
+<table>
+  <tr class=header>
+    <td>Who over who</td><td>Count</td>
+  </tr>
+  {{range .MatchOffs}}
+    <tr>
+      <td class=name>{{.People}}</td>
+      <td>{{.Count}}</td>
+    </tr>
+  {{end}}
+</table>
 <h2>Docs</h2>
 
 <div class=docs>
@@ -104,7 +114,6 @@
     <li>Winning a game: 10</li>
   </ul>
   <p>You can start racking up points as soon as your client is able.</p>
-  <p><b>Hints</b> Telnet works</p>
 </div>
 
 

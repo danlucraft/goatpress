@@ -16,6 +16,7 @@ type Tournament struct {
   DataPath string
   Scores   Scores
   AllPlayerNames map[string]bool
+  InProgress map[string]bool
 }
 
 type Scores struct {
@@ -50,7 +51,11 @@ func blankTournament(gt GameType, dataPath string) *Tournament {
 }
 
 func newTournamentWithScores(gt GameType, scores Scores, dataPath string) *Tournament {
-  return &Tournament{gt, make(map[string]Player), make([]Match, 0), dataPath, scores, make(map[string]bool)}
+  names := make(map[string]bool)
+  for name, _ := range scores.Games {
+    names[name] = true
+  }
+  return &Tournament{gt, make(map[string]Player), make([]Match, 0), dataPath, scores, names, make(map[string]bool)}
 }
 
 func (t *Tournament) RegisterPlayer(p Player) {
@@ -75,51 +80,82 @@ func (t *Tournament) PlayerList() string {
   return s
 }
 
+type MatchResult struct {
+  Player1   string
+  Player2   string
+  Winner    int
+  MoveCount int
+}
+
 func (t *Tournament) PlayMatch() {
-  if len(t.Players) > 1 {
-    player1 := t.RandomPlayer()
-    player2 := t.RandomPlayer()
-    for player1.Name() == player2.Name() {
-      player2 = t.RandomPlayer()
+  if t.NonPlayingCount() > 2 {
+    player1 := t.RandomNonplayingPlayer()
+    player2 := t.RandomNonplayingPlayer()
+    for player1.Name() == player2.Name() || (player1.Name() == "Random" && player2.Name() == "Random2") || (player2.Name() == "Random" && player1.Name() == "Random2") {
+      player2 = t.RandomNonplayingPlayer()
     }
     fmt.Printf("Match between %s and %s... \n", player1.Name(), player2.Name())
     match := newMatch(&t.GameType, player1, player2)
-    t.Matches = append(t.Matches, *match)
-    match.Play()
-
-    name1 := player1.Name()
-    name2 := player2.Name()
-    t.Scores.Games[name1] += 1
-    t.Scores.Games[name2] += 1
-    t.Scores.Moves[name1] += len(match.Game.Moves)
-    t.Scores.Moves[name2] += len(match.Game.Moves)
-    winnerIx := match.Winner()
-    if winnerIx == 0 {
-      fmt.Printf("DRAW\n")
-    } else if winnerIx == 1 {
-      t.Scores.Wins[name1] += 1
-      t.Scores.Losses[name2] += 1
-      t.Scores.WinProduct[name1 + ">" + name2] += 1
-      fmt.Printf("Winner was %s\n", player1.Name())
-    } else if winnerIx == 2 {
-      t.Scores.Wins[name2] += 1
-      t.Scores.Losses[name1] += 1
-      t.Scores.WinProduct[name2 + ">" + name1] += 1
-      fmt.Printf("Winner was %s\n", player2.Name())
-    }
+    t.InProgress[player1.Name()] = true
+    t.InProgress[player2.Name()] = true
+    go AsyncPlayMatch(match)
   }
 }
 
-func (t *Tournament) RandomPlayer() Player {
-  i := rand.Intn(len(t.Players))
-  j := 0
-  for _, player := range t.Players {
-    if j == i {
-      return player
-    }
-    j++
+func (t *Tournament) RecordResult(result MatchResult) {
+  name1 := result.Player1
+  name2 := result.Player2
+  t.Scores.Games[name1] += 1
+  t.Scores.Games[name2] += 1
+  t.Scores.Moves[name1] += result.MoveCount
+  t.Scores.Moves[name2] += result.MoveCount
+  winnerIx := result.Winner
+  if winnerIx == 0 {
+    fmt.Printf("DRAW\n")
+  } else if winnerIx == 1 {
+    t.Scores.Wins[name1] += 1
+    t.Scores.Losses[name2] += 1
+    t.Scores.WinProduct[name1 + ">" + name2] += 1
+    fmt.Printf("Winner was %s\n", name1)
+  } else if winnerIx == 2 {
+    t.Scores.Wins[name2] += 1
+    t.Scores.Losses[name1] += 1
+    t.Scores.WinProduct[name2 + ">" + name1] += 1
+    fmt.Printf("Winner was %s\n", name2)
   }
-  panic("your programming is bad")
+  t.InProgress[name1] = false
+  t.InProgress[name2] = false
+}
+
+func AsyncPlayMatch(match *Match) {
+  match.Play()
+  result := MatchResult{match.Player1.Name(), 
+                   match.Player2.Name(), 
+                   match.Winner(), 
+                   len(match.Game.Moves) }
+  matchResults <- result
+}
+
+func (t *Tournament) RandomNonplayingPlayer() Player {
+  nonPlaying := make([]string, 0)
+  for name, _ := range t.Players {
+    if !t.InProgress[name] {
+      nonPlaying = append(nonPlaying, name)
+    }
+  }
+  i := rand.Intn(len(nonPlaying))
+  playerName := nonPlaying[i]
+  return t.Players[playerName]
+}
+
+func (t *Tournament) NonPlayingCount() int {
+  count := 0
+  for name, _ := range t.Players {
+    if !t.InProgress[name] {
+      count++
+    }
+  }
+  return count
 }
 
 func (t *Tournament) ScoreFor(name string) int {

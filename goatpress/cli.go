@@ -12,12 +12,12 @@ func Demo() {
   tourney.PlayMatch()
 }
 
-func ServerStart(dataPath string) {
-  server := newServer(dataPath)
+func ServerStart(dataPath string, clientTimeout string, serverPort int, webPort int) {
+  server := newServer(dataPath, clientTimeout, serverPort, webPort)
   server.Run()
 }
 
-func ClientStart(name string) {
-  client := newClient(name)
+func ClientStart(name string, serverPort int) {
+  client := newClient(name, serverPort)
   client.Run()
 }
