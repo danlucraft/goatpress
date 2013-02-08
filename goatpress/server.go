@@ -58,6 +58,24 @@ type PlayerStats struct {
   Losses int
 }
 
+type SortableStatsList []PlayerStats
+
+func (l *SortableStatsList) Len() int {
+  return len([]PlayerStats(*l))
+}
+
+func (l *SortableStatsList) Less(i int, j int) bool {
+  a := []PlayerStats(*l)
+  return a[i].Score > a[j].Score // reverse order
+}
+
+func (l *SortableStatsList) Swap(i int, j int) {
+  a := []PlayerStats(*l)
+  tmp := a[i]
+  a[i] = a[j]
+  a[j] = tmp
+}
+
 type Matchoff struct {
   People string
   Count  int
@@ -89,9 +107,9 @@ func homePage(w http.ResponseWriter, r *http.Request) {
   for matchOff, count := range scores.WinProduct {
     matchOffs = append(matchOffs, Matchoff{matchOff, count})
   }
-  vs := NewValSorter(stats, func (s PlayerStats) int { return s.Score*-1 })
-  vs.Sort()
-  t.Execute(w, &HomePage{pc, vs.Keys, matchOffs})
+  sss := SortableStatsList(stats)
+  sort.Sort(&sss)
+  t.Execute(w, &HomePage{pc, []PlayerStats(sss), matchOffs})
 }
 
 func (c *Server) RunWeb() {
@@ -168,33 +186,3 @@ func AcceptPlayers(listener net.Listener, clientTimeout string) {
     }
   }
 }
-
-type ValSorter struct {
-        Keys []PlayerStats
-        Vals []int
-}
- 
-func NewValSorter(values []PlayerStats, mapper func(PlayerStats) int) *ValSorter {
-        vs := &ValSorter{
-                Keys: make([]PlayerStats, 0, len(values)),
-                Vals: make([]int, 0, len(values)),
-        }
-        for _, v := range values {
-                vs.Keys = append(vs.Keys, v)
-                vs.Vals = append(vs.Vals, mapper(v))
-        }
-        return vs
-}
- 
-func (vs *ValSorter) Sort() {
-        sort.Sort(vs)
-}
- 
-func (vs *ValSorter) Len() int           { return len(vs.Vals) }
-func (vs *ValSorter) Less(i, j int) bool { return vs.Vals[i] < vs.Vals[j] }
-func (vs *ValSorter) Swap(i, j int) {
-        vs.Vals[i], vs.Vals[j] = vs.Vals[j], vs.Vals[i]
-        vs.Keys[i], vs.Keys[j] = vs.Keys[j], vs.Keys[i]
-}
-
-
