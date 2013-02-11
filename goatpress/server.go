@@ -101,7 +101,10 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		l := scores.Losses[name]
 		d := g - w - l
 		s := 10*g + m + 10*d + 100*w
-    mt := (scores.Times[name] / int64(scores.MoveCounts[name]))/1000
+    mt := int64(0)
+    if scores.MoveCounts[name] > 0 {
+      mt = (scores.Times[name] / int64(scores.MoveCounts[name]))/1000
+    }
 		stat := PlayerInfo{name, s / 10, g, m, w, d, l, mt}
 		stats = append(stats, &stat)
 	}
