@@ -19,12 +19,25 @@ type Tournament struct {
 	InProgress     map[string]bool
 }
 
+type MatchResult struct {
+	Player1   string
+	Player2   string
+	Winner    int
+	MoveCount int
+  Time1     int64
+  Time2     int64
+  Moves1    int
+  Moves2    int
+}
+
 type Scores struct {
 	Games      map[string]int
 	Moves      map[string]int
 	Wins       map[string]int
 	Losses     map[string]int
 	WinProduct map[string]int
+  Times      map[string]int64
+  MoveCounts map[string]int
 }
 
 func newTournament(gt GameType, dataPath string) *Tournament {
@@ -46,7 +59,9 @@ func blankTournament(gt GameType, dataPath string) *Tournament {
 	w := make(map[string]int)
 	l := make(map[string]int)
 	tb := make(map[string]int)
-	tm := Scores{g, m, w, l, tb}
+  sp := make(map[string]int64)
+  mc := make(map[string]int)
+	tm := Scores{g, m, w, l, tb, sp, mc}
 	return newTournamentWithScores(gt, tm, dataPath)
 }
 
@@ -55,7 +70,13 @@ func newTournamentWithScores(gt GameType, scores Scores, dataPath string) *Tourn
 	for name, _ := range scores.Games {
 		names[name] = true
 	}
-	return &Tournament{gt, make(map[string]Player), make([]Match, 0), dataPath, scores, names, make(map[string]bool)}
+	return &Tournament{gt,
+            make(map[string]Player),
+            make([]Match, 0),
+            dataPath,
+            scores,
+            names,
+            make(map[string]bool)}
 }
 
 func (t *Tournament) RegisterPlayer(p Player) {
@@ -80,15 +101,8 @@ func (t *Tournament) PlayerList() string {
 	return s
 }
 
-type MatchResult struct {
-	Player1   string
-	Player2   string
-	Winner    int
-	MoveCount int
-}
-
 func (t *Tournament) PlayMatch() {
-	if t.NonPlayingCount() > 2 {
+	if t.NonPlayingCount() > 1 {
 		player1 := t.RandomNonplayingPlayer()
 		player2 := t.RandomNonplayingPlayer()
 		for player1.Name() == player2.Name() || (player1.Name() == "Random" && player2.Name() == "Random2") || (player2.Name() == "Random" && player1.Name() == "Random2") {
@@ -109,6 +123,10 @@ func (t *Tournament) RecordResult(result MatchResult) {
 	t.Scores.Games[name2] += 1
 	t.Scores.Moves[name1] += result.MoveCount
 	t.Scores.Moves[name2] += result.MoveCount
+  t.Scores.Times[name1] += result.Time1
+  t.Scores.Times[name2] += result.Time2
+  t.Scores.MoveCounts[name1] += result.Moves1
+  t.Scores.MoveCounts[name2] += result.Moves2
 	winnerIx := result.Winner
 	if winnerIx == 0 {
 		fmt.Printf("DRAW\n")
@@ -132,7 +150,11 @@ func AsyncPlayMatch(match *Match) {
 	result := MatchResult{match.Player1.Name(),
 		match.Player2.Name(),
 		match.Winner(),
-		len(match.Game.Moves)}
+		len(match.Game.Moves),
+    match.Time1,
+    match.Time2,
+    match.MoveCount(1),
+    match.MoveCount(2)}
 	matchResults <- result
 }
 

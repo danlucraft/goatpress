@@ -29,10 +29,10 @@ var server *Server
 func newServer(dataPath string, clientTimeout string, serverPort int, webPort int) *Server {
 	gameType := newGameType(5, DefaultWordSet)
 	tourney := newTournament(*gameType, dataPath)
-	randomPlayer := newInternalPlayer("Random", newRandomFinder(DefaultWordSet))
-	randomPlayer2 := newInternalPlayer("Random2", newRandomFinder(DefaultWordSet))
-	tourney.RegisterPlayer(randomPlayer)
-	tourney.RegisterPlayer(randomPlayer2)
+	//randomPlayer := newInternalPlayer("Random", newRandomFinder(DefaultWordSet))
+	//randomPlayer2 := newInternalPlayer("Random2", newRandomFinder(DefaultWordSet))
+	//tourney.RegisterPlayer(randomPlayer)
+	//tourney.RegisterPlayer(randomPlayer2)
 	server = &Server{tourney, dataPath, clientTimeout, serverPort, webPort}
 	return server
 }
@@ -50,13 +50,14 @@ type HomePage struct {
 }
 
 type PlayerInfo struct {
-	Name   string
-	Score  int
-	Games  int
-	Moves  int
-	Wins   int
-	Draws  int
-	Losses int
+	Name     string
+	Score    int
+	Games    int
+	Moves    int
+	Wins     int
+	Draws    int
+	Losses   int
+  MeanTime int64
 }
 
 type PlayerInfoList []*PlayerInfo
@@ -100,7 +101,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		l := scores.Losses[name]
 		d := g - w - l
 		s := 10*g + m + 10*d + 100*w
-		stat := PlayerInfo{name, s / 10, g, m, w, d, l}
+    mt := (scores.Times[name] / int64(scores.MoveCounts[name]))/1000
+		stat := PlayerInfo{name, s / 10, g, m, w, d, l, mt}
 		stats = append(stats, &stat)
 	}
 

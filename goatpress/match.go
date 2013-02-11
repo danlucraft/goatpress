@@ -3,6 +3,7 @@ package goatpress
 import (
 	"encoding/json"
 	"fmt"
+  "time"
 )
 
 type Match struct {
@@ -10,10 +11,12 @@ type Match struct {
 	Player1 Player
 	Player2 Player
 	played  bool
+  Time1   int64
+  Time2   int64
 }
 
 func newMatch(gt *GameType, p1 Player, p2 Player) *Match {
-	return &Match{gt.NewGame(), p1, p2, false}
+	return &Match{gt.NewGame(), p1, p2, false, 0, 0}
 }
 
 func (m *Match) Play() {
@@ -36,6 +39,7 @@ func (m *Match) Play() {
 		response := MOVE_UNMADE
 		i := 0
 		move = MakePassMove()
+    beforeTime := time.Now()
 		for i < 100 && response != MOVE_OK { // should have limit on number of invalid moves?
 			lastOpponentMove := lastMoves[(playerIx+1)%2]
 			lastOpponentMoveMessage := ""
@@ -58,6 +62,16 @@ func (m *Match) Play() {
 			}
 			i++
 		}
+    afterTime := time.Now()
+    if !move.IsPass {
+      dur := afterTime.Sub(beforeTime).Nanoseconds()
+      if playerIx == 0 {
+        m.Time1 += dur
+      }
+      if playerIx == 1 {
+        m.Time2 += dur
+      }
+    }
 
 		if response != MOVE_OK {
 			move = MakePassMove()
@@ -79,6 +93,16 @@ func (m *Match) Winner() int {
 		return 2
 	}
 	return 0
+}
+
+func (m *Match) MoveCount(pl int) int {
+  ix := 1
+  result := 0
+  for _, move := range m.Game.Moves {
+    if !move.IsPass { result++ }
+    ix = (ix % 2) + 1
+  }
+  return result
 }
 
 type MatchMarshaller struct {

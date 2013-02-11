@@ -57,7 +57,9 @@
     <td>Wins</td>
     <td>Draws</td>
     <td>Losses</td>
+    <td>Av Time (ms)</td>
   </td>
+
   {{range .Players}}
     <tr>
       <td class=name>{{.Name}}</td>
@@ -67,6 +69,7 @@
       <td>{{.Wins}}</td>
       <td>{{.Draws}}</td>
       <td>{{.Losses}}</td>
+      <td>{{.MeanTime}}</td>
     </tr>
   {{end}}
 </table>
