@@ -45,11 +45,11 @@ func (c *Server) Run() {
 
 type HomePage struct {
 	PlayerCount int
-	Players     []*PlayerStats
+	Players     []*PlayerInfo
 	MatchOffs   []Matchoff
 }
 
-type PlayerStats struct {
+type PlayerInfo struct {
 	Name   string
 	Score  int
 	Games  int
@@ -59,19 +59,19 @@ type PlayerStats struct {
 	Losses int
 }
 
-type SortableStatsList []*PlayerStats
+type PlayerInfoList []*PlayerInfo
 
-func (l *SortableStatsList) Len() int {
-	return len([]*PlayerStats(*l))
+func (l *PlayerInfoList) Len() int {
+	return len([]*PlayerInfo(*l))
 }
 
-func (l *SortableStatsList) Less(i int, j int) bool {
-	a := []*PlayerStats(*l)
+func (l *PlayerInfoList) Less(i int, j int) bool {
+	a := []*PlayerInfo(*l)
 	return a[i].Score > a[j].Score // reverse order
 }
 
-func (l *SortableStatsList) Swap(i int, j int) {
-	a := []*PlayerStats(*l)
+func (l *PlayerInfoList) Swap(i int, j int) {
+	a := []*PlayerInfo(*l)
 	tmp := a[i]
 	a[i] = a[j]
 	a[j] = tmp
@@ -91,7 +91,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pc := len(server.Tournament.Players)
-	stats := SortableStatsList{}
+	stats := PlayerInfoList{}
 	scores := server.Tournament.Scores
 	for name, _ := range server.Tournament.AllPlayerNames {
 		g := scores.Games[name]
@@ -100,7 +100,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		l := scores.Losses[name]
 		d := g - w - l
 		s := 10*g + m + 10*d + 100*w
-		stat := PlayerStats{name, s / 10, g, m, w, d, l}
+		stat := PlayerInfo{name, s / 10, g, m, w, d, l}
 		stats = append(stats, &stat)
 	}
 
