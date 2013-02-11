@@ -61,17 +61,17 @@ type PlayerInfo struct {
 
 type PlayerInfoList []*PlayerInfo
 
-func (l *PlayerInfoList) Len() int {
-	return len([]*PlayerInfo(*l))
+func (l PlayerInfoList) Len() int {
+	return len([]*PlayerInfo(l))
 }
 
-func (l *PlayerInfoList) Less(i int, j int) bool {
-	a := []*PlayerInfo(*l)
+func (l PlayerInfoList) Less(i int, j int) bool {
+	a := []*PlayerInfo(l)
 	return a[i].Score > a[j].Score // reverse order
 }
 
-func (l *PlayerInfoList) Swap(i int, j int) {
-	a := []*PlayerInfo(*l)
+func (l PlayerInfoList) Swap(i int, j int) {
+	a := []*PlayerInfo(l)
 	tmp := a[i]
 	a[i] = a[j]
 	a[j] = tmp
@@ -108,7 +108,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	for matchOff, count := range scores.WinProduct {
 		matchOffs = append(matchOffs, Matchoff{matchOff, count})
 	}
-	sort.Sort(&stats)
+	sort.Sort(stats)
 	t.Execute(w, &HomePage{pc, stats, matchOffs})
 }
 
