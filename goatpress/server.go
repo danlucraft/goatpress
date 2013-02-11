@@ -45,7 +45,7 @@ func (c *Server) Run() {
 
 type HomePage struct {
 	PlayerCount int
-	Players     []PlayerStats
+	Players     []*PlayerStats
 	MatchOffs   []Matchoff
 }
 
@@ -59,19 +59,19 @@ type PlayerStats struct {
 	Losses int
 }
 
-type SortableStatsList []PlayerStats
+type SortableStatsList []*PlayerStats
 
 func (l *SortableStatsList) Len() int {
-	return len([]PlayerStats(*l))
+	return len([]*PlayerStats(*l))
 }
 
 func (l *SortableStatsList) Less(i int, j int) bool {
-	a := []PlayerStats(*l)
+	a := []*PlayerStats(*l)
 	return a[i].Score > a[j].Score // reverse order
 }
 
 func (l *SortableStatsList) Swap(i int, j int) {
-	a := []PlayerStats(*l)
+	a := []*PlayerStats(*l)
 	tmp := a[i]
 	a[i] = a[j]
 	a[j] = tmp
@@ -101,7 +101,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		d := g - w - l
 		s := 10*g + m + 10*d + 100*w
 		stat := PlayerStats{name, s / 10, g, m, w, d, l}
-		stats = append(stats, stat)
+		stats = append(stats, &stat)
 	}
 
 	matchOffs := make([]Matchoff, 0)
