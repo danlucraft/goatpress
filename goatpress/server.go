@@ -91,7 +91,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pc := len(server.Tournament.Players)
-	stats := make([]PlayerStats, 0)
+	stats := SortableStatsList{}
 	scores := server.Tournament.Scores
 	for name, _ := range server.Tournament.AllPlayerNames {
 		g := scores.Games[name]
@@ -108,9 +108,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	for matchOff, count := range scores.WinProduct {
 		matchOffs = append(matchOffs, Matchoff{matchOff, count})
 	}
-	sss := SortableStatsList(stats)
-	sort.Sort(&sss)
-	t.Execute(w, &HomePage{pc, []PlayerStats(sss), matchOffs})
+	sort.Sort(&stats)
+	t.Execute(w, &HomePage{pc, stats, matchOffs})
 }
 
 func (c *Server) RunWeb() {
