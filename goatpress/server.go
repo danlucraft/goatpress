@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const serverAddress = "10.32.4.142"
+const serverAddress = "127.0.0.1"
 
 var newPlayers = make(chan Player)
 var removePlayers = make(chan string)
@@ -57,7 +57,7 @@ type PlayerInfo struct {
 	Wins     int
 	Draws    int
 	Losses   int
-  MeanTime int64
+	MeanTime int64
 }
 
 type PlayerInfoList []*PlayerInfo
@@ -101,10 +101,10 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		l := scores.Losses[name]
 		d := g - w - l
 		s := 10*g + m + 10*d + 100*w
-    mt := int64(0)
-    if scores.MoveCounts[name] > 0 {
-      mt = (scores.Times[name] / int64(scores.MoveCounts[name]))/1000
-    }
+		mt := int64(0)
+		if scores.MoveCounts[name] > 0 {
+			mt = (scores.Times[name] / int64(scores.MoveCounts[name])) / 1000
+		}
 		stat := PlayerInfo{name, s / 10, g, m, w, d, l, mt}
 		stats = append(stats, &stat)
 	}
