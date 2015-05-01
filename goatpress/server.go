@@ -10,11 +10,20 @@ import (
 	"time"
 )
 
-const serverAddress = "127.0.0.1"
+const (
+	serverAddress      = "127.0.0.1"
+	scoreForConnection = 1
+	scoreForMove       = 10
+	scoreForDraw       = 100
+	scoreForWin        = 1000
+)
 
-var newPlayers = make(chan Player)
-var removePlayers = make(chan string)
-var matchResults = make(chan MatchResult)
+var (
+	server        *Server
+	newPlayers    = make(chan Player)
+	removePlayers = make(chan string)
+	matchResults  = make(chan MatchResult)
+)
 
 type Server struct {
 	Tournament    *Tournament
@@ -23,8 +32,6 @@ type Server struct {
 	serverPort    int
 	webPort       int
 }
-
-var server *Server
 
 func newServer(dataPath string, clientTimeout string, serverPort int, webPort int) *Server {
 	gameType := newGameType(5, DefaultWordSet)
@@ -95,17 +102,18 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	stats := PlayerInfoList{}
 	scores := server.Tournament.Scores
 	for name, _ := range server.Tournament.AllPlayerNames {
-		g := scores.Games[name]
-		m := scores.Moves[name]
-		w := scores.Wins[name]
-		l := scores.Losses[name]
-		d := g - w - l
-		s := 10*g + m + 10*d + 100*w
+		games := scores.Games[name]
+		moves := scores.Moves[name]
+		wins := scores.Wins[name]
+		losses := scores.Losses[name]
+
+		draws := games - wins - losses
+		score := scoreForConnection*games + scoreForMove*moves + scoreForDraw*draws + scoreForWin*wins
 		mt := int64(0)
 		if scores.MoveCounts[name] > 0 {
 			mt = (scores.Times[name] / int64(scores.MoveCounts[name])) / 1000
 		}
-		stat := PlayerInfo{name, s / 10, g, m, w, d, l, mt}
+		stat := PlayerInfo{name, score / 10, games, moves, wins, draws, losses, mt}
 		stats = append(stats, &stat)
 	}
 

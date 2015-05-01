@@ -19,12 +19,12 @@ type Player interface {
 }
 
 const (
-	MSG_NONE               = iota
-	MSG_BAD_MOVE_UNKNOWN   = iota
-	MSG_BAD_MOVE_PREFIX    = iota
-	MSG_BAD_MOVE_ALREADY   = iota
-	MSG_BAD_MOVE_TOO_SHORT = iota
-	MSG_OPPONENT_MOVE      = iota
+	MSG_NONE = iota
+	MSG_BAD_MOVE_UNKNOWN
+	MSG_BAD_MOVE_PREFIX
+	MSG_BAD_MOVE_ALREADY
+	MSG_BAD_MOVE_TOO_SHORT
+	MSG_OPPONENT_MOVE
 )
 
 type InternalPlayer struct {
