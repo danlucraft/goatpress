@@ -44,10 +44,10 @@ func newServer(dataPath string, clientTimeout string, serverPort int, webPort in
 	return server
 }
 
-func (c *Server) Run() {
-	fmt.Printf("Starting server on %d (web %d)\n", c.serverPort, c.webPort)
-	go c.RunWeb()
-	c.RunTournament()
+func (s *Server) Run() {
+	fmt.Printf("Starting server on %d (web %d)\n", s.serverPort, s.webPort)
+	go s.RunWeb()
+	s.RunTournament()
 }
 
 type HomePage struct {
