@@ -18,7 +18,7 @@ type Client struct {
 
 func newClient(name string, serverPort int) *Client {
 	address := serverAddress + fmt.Sprintf(":%d", serverPort)
-	println(address)
+	fmt.Printf("Server:      %s\n", address)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
 		println("ResolveTCPAddr failed:", err.Error())

@@ -91,7 +91,7 @@ type Matchoff struct {
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("src/goatpress/views/index.html")
+	t, err := template.ParseFiles("goatpress/views/index.html")
 	if err != nil {
 		fmt.Println(err)
 		w.Write([]byte("error"))
@@ -128,13 +128,11 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func (c *Server) RunWeb() {
 	http.HandleFunc("/", homePage)
 	port := fmt.Sprintf(":%d", c.webPort)
-	println(port)
 	http.ListenAndServe(port, nil)
 }
 
 func (c *Server) RunTournament() {
 	address := serverAddress + fmt.Sprintf(":%d", c.serverPort)
-	println(address)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		fmt.Printf("error listening:", err.Error())
