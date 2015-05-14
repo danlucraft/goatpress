@@ -191,9 +191,11 @@ func AcceptPlayers(listener net.Listener, clientTimeout string) {
 			return
 		}
 		conn.Write([]byte(serverSig))
-		player := newClientPlayer(conn, removePlayers, clientTimeout)
-		if player != nil {
-			newPlayers <- player
-		}
+		go func() {
+			player := newClientPlayer(conn, removePlayers, clientTimeout)
+			if player != nil {
+				newPlayers <- player
+			}
+		}()
 	}
 }
