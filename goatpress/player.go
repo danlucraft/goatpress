@@ -15,6 +15,7 @@ type Player interface {
 	Name() string
 	NewGame(GameState)
 	GetMove(int, string, GameState) Move
+	Disconnect(string)
 	Ping() bool
 }
 
@@ -41,6 +42,10 @@ func (p InternalPlayer) NewGame(_ GameState) {
 
 func (p InternalPlayer) Name() string {
 	return p.name
+}
+
+func (p InternalPlayer) Disconnect(_ string) {
+	return
 }
 
 func (p InternalPlayer) Ping() bool {
@@ -159,10 +164,14 @@ func (p ClientPlayer) readLine() (string, error) {
 	return line, nil
 }
 
-func (p *ClientPlayer) Unregister() {
-	p.writeLine("unregistering for \"reasons\"")
+func (p *ClientPlayer) Disconnect(reason string) {
+	p.writeLine(fmt.Sprintf("unregistering: %s", reason))
 	p.conn.Close()
 	p.closed = true
+}
+
+func (p *ClientPlayer) Unregister() {
+	p.Disconnect("\"reasons\"")
 	p.unregister <- p.name
 }
 

@@ -81,6 +81,7 @@ func newTournamentWithScores(gt GameType, scores Scores, dataPath string) *Tourn
 
 func (t *Tournament) RegisterPlayer(p Player) {
 	if _, present := t.Players[p.Name()]; present {
+		p.Disconnect("Already a player with that name")
 		return
 	}
 	t.AllPlayerNames[p.Name()] = true
