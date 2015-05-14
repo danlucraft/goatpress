@@ -44,6 +44,14 @@
     text-align: left;
   }
 
+  span.connected {
+    content: "YES";
+  }
+
+  span.not-connected {
+    content: "NO";
+  }
+
 </style>
 <h1>Goatpress</h1>
 
@@ -62,7 +70,10 @@
 
   {{range .Players}}
     <tr>
-      <td class=name>{{.Name}}</td>
+      <td class=name>
+        {{.Name}}
+        {{.IsConnectedClass}}
+      </td>
       <td>{{.Score}}</td>
       <td>{{.Games}}</td>
       <td>{{.Moves}}</td>

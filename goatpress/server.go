@@ -57,14 +57,15 @@ type HomePage struct {
 }
 
 type PlayerInfo struct {
-	Name     string
-	Score    int
-	Games    int
-	Moves    int
-	Wins     int
-	Draws    int
-	Losses   int
-	MeanTime int64
+	Name             string
+	Score            int
+	Games            int
+	Moves            int
+	Wins             int
+	Draws            int
+	Losses           int
+	MeanTime         int64
+	IsConnectedClass string
 }
 
 type PlayerInfoList []*PlayerInfo
@@ -102,6 +103,10 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	stats := PlayerInfoList{}
 	scores := server.Tournament.Scores
 	for name, _ := range server.Tournament.AllPlayerNames {
+		isConnectedClass := "❌"
+		if server.Tournament.Players[name] != nil {
+			isConnectedClass = "✅"
+		}
 		games := scores.Games[name]
 		moves := scores.Moves[name]
 		wins := scores.Wins[name]
@@ -113,7 +118,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		if scores.MoveCounts[name] > 0 {
 			mt = (scores.Times[name] / int64(scores.MoveCounts[name])) / 1000
 		}
-		stat := PlayerInfo{name, score / 10, games, moves, wins, draws, losses, mt}
+		stat := PlayerInfo{name, score / 10, games, moves, wins, draws, losses, mt, isConnectedClass}
 		stats = append(stats, &stat)
 	}
 
@@ -144,17 +149,22 @@ func (c *Server) RunTournament() {
 
 	for {
 		select {
+
 		case newPlayer := <-newPlayers:
 			if newPlayer.Name() != "" {
-				fmt.Printf("Player Online: %s\n", newPlayer.Name())
+				fmt.Printf("Player online: %s\n", newPlayer.Name())
 				c.Tournament.RegisterPlayer(newPlayer)
 			}
+
 		case removePlayerName := <-removePlayers:
+			fmt.Printf("Player offline %s\n", removePlayerName)
 			if removePlayerName != "" {
 				c.Tournament.DeregisterPlayer(removePlayerName)
 			}
+
 		case result := <-matchResults:
 			c.Tournament.RecordResult(result)
+
 		default:
 			for name, player := range c.Tournament.Players {
 				if !c.Tournament.InProgress[name] {
@@ -172,8 +182,9 @@ func (c *Server) RunTournament() {
 				time.Sleep(0.2 * 1e9)
 			}
 		}
+
 		playersTicker++
-		if playersTicker > 100000 {
+		if playersTicker > 100 {
 			fmt.Printf("Players: %s\n", c.Tournament.PlayerList())
 			playersTicker = 0
 		}
