@@ -39,6 +39,9 @@
     padding: 5px;
     margin: 0;
   }
+  td.name {
+    width: 200px;
+  }
 
   .docs {
     text-align: left;
@@ -59,6 +62,7 @@
 <table>
   <tr class=header>
     <td>Name</td>
+    <td>Online</td>
     <td>Score</td>
     <td>Games</td>
     <td>Moves</td>
@@ -72,6 +76,8 @@
     <tr>
       <td class=name>
         {{.Name}}
+      </td>
+      <td>
         {{.IsConnectedClass}}
       </td>
       <td>{{.Score}}</td>

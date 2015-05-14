@@ -36,10 +36,10 @@ type Server struct {
 func newServer(dataPath string, clientTimeout string, serverPort int, webPort int) *Server {
 	gameType := newGameType(5, DefaultWordSet)
 	tourney := newTournament(*gameType, dataPath)
-	//randomPlayer := newInternalPlayer("Random", newRandomFinder(DefaultWordSet))
-	//randomPlayer2 := newInternalPlayer("Random2", newRandomFinder(DefaultWordSet))
-	//tourney.RegisterPlayer(randomPlayer)
-	//tourney.RegisterPlayer(randomPlayer2)
+	randomPlayer := newInternalPlayer("Random", newRandomFinder(DefaultWordSet))
+	randomPlayer2 := newInternalPlayer("Random2", newRandomFinder(DefaultWordSet))
+	tourney.RegisterPlayer(randomPlayer)
+	tourney.RegisterPlayer(randomPlayer2)
 	server = &Server{tourney, dataPath, clientTimeout, serverPort, webPort}
 	return server
 }
@@ -184,7 +184,7 @@ func (c *Server) RunTournament() {
 		}
 
 		playersTicker++
-		if playersTicker > 100 {
+		if playersTicker > 1000000 {
 			fmt.Printf("Players: %s\n", c.Tournament.PlayerList())
 			playersTicker = 0
 		}

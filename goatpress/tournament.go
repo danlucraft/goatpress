@@ -106,8 +106,11 @@ func (t *Tournament) PlayMatch() {
 	if t.NonPlayingCount() > 1 {
 		player1 := t.RandomNonplayingPlayer()
 		player2 := t.RandomNonplayingPlayer()
-		for player1.Name() == player2.Name() || (player1.Name() == "Random" && player2.Name() == "Random2") || (player2.Name() == "Random" && player1.Name() == "Random2") {
+		for player1.Name() == player2.Name() { //
 			player2 = t.RandomNonplayingPlayer()
+		}
+		if (player1.Name() == "Random" && player2.Name() == "Random2") || (player2.Name() == "Random" && player1.Name() == "Random2") {
+			return
 		}
 		fmt.Printf("Match between %s and %s... \n", player1.Name(), player2.Name())
 		match := newMatch(&t.GameType, player1, player2)
