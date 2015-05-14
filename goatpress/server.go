@@ -189,13 +189,16 @@ func AcceptPlayers(listener net.Listener, clientTimeout string) {
 		if err != nil {
 			println("Error accept:", err.Error())
 			return
+		} else {
+			conn.Write([]byte(serverSig))
+			go IdentifyPlayer(conn, clientTimeout)
 		}
-		conn.Write([]byte(serverSig))
-		go func() {
-			player := newClientPlayer(conn, removePlayers, clientTimeout)
-			if player != nil {
-				newPlayers <- player
-			}
-		}()
+	}
+}
+
+func IdentifyPlayer(conn net.Conn, clientTimeout string) {
+	player := newClientPlayer(conn, removePlayers, clientTimeout)
+	if player != nil {
+		newPlayers <- player
 	}
 }
