@@ -207,6 +207,7 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
 		//fmt.Printf("%s passes due to closed connection\n", p.name)
 		return MakePassMove()
 	}
+
 	if data == "pass" {
 		return MakePassMove()
 	} else if moveFormat.MatchString(data) {
@@ -227,6 +228,7 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
 		p.writeLine("invalid: bad-format, passing ; ")
 		return MakePassMove()
 	}
+
 	return MakePassMove()
 }
 
