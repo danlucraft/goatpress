@@ -141,7 +141,7 @@ func (g *Game) Marshaller() GameMarshaller {
 	return GameMarshaller{g.Board.Letters, g.Moves}
 }
 
-// *** GameState: a representation of the current state 
+// *** GameState: a representation of the current state
 // of the game.
 
 type GameState struct {

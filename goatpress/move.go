@@ -33,7 +33,7 @@ func (move *Move) ToMessage() string {
 			tiles += ","
 		}
 	}
-	return fmt.Sprintf("move:%s", tiles)
+	return fmt.Sprintf("move:%s (%s)", tiles, move.Word)
 }
 
 func (move *Move) ToString() string {

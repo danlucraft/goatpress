@@ -17,6 +17,7 @@ type WordSet interface {
 	Includes(string) bool
 	ChooseRandom() string
 	Length() int
+	All() []string
 }
 
 type HashWordSet struct {
@@ -29,11 +30,22 @@ func newWordSet() *HashWordSet {
 }
 
 var DefaultWordSet = defaultWordSet()
+var HalfWordSet = removeHalf(DefaultWordSet)
 
 func defaultWordSet() *HashWordSet {
 	_, filename, _, _ := runtime.Caller(1)
 	path := path.Join(path.Dir(filename), defaultDataPath)
 	return newWordSetFromFile(path)
+}
+
+func removeHalf(ws WordSet) *HashWordSet {
+	newWs := newWordSet()
+	for _, word := range ws.All() {
+		if rand.Intn(1000) == 0 {
+			newWs.Add(word)
+		}
+	}
+	return newWs
 }
 
 func newWordSetFromFile(path string) *HashWordSet {
@@ -69,4 +81,8 @@ func (set *HashWordSet) ChooseRandom() string {
 
 func (set *HashWordSet) Length() int {
 	return len(set.words2)
+}
+
+func (set *HashWordSet) All() []string {
+	return set.words2
 }

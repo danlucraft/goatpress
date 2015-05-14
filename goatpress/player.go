@@ -13,7 +13,7 @@ import (
 
 type Player interface {
 	Name() string
-	NewGame(GameState)
+	NewGame(GameState, string)
 	GetMove(int, string, GameState) Move
 	Disconnect(string)
 	Ping() bool
@@ -37,7 +37,7 @@ func newInternalPlayer(name string, moveFinder MoveFinder) InternalPlayer {
 	return InternalPlayer{name, moveFinder}
 }
 
-func (p InternalPlayer) NewGame(_ GameState) {
+func (p InternalPlayer) NewGame(_ GameState, OpponentName string) {
 }
 
 func (p InternalPlayer) Name() string {
@@ -94,8 +94,8 @@ func newClientPlayer(conn net.Conn, unregister chan string, clientTimeout string
 	return p
 }
 
-func (p *ClientPlayer) NewGame(_ GameState) {
-	p.writeLine("new game ;")
+func (p *ClientPlayer) NewGame(_ GameState, OpponentName string) {
+	p.writeLine(fmt.Sprintf("new game vs '%s';", OpponentName))
 }
 
 func (p *ClientPlayer) Name() string {
@@ -175,7 +175,7 @@ func (p *ClientPlayer) Unregister() {
 	p.unregister <- p.name
 }
 
-var moveFormat = regexp.MustCompile(`^move:([0-9][0-9],?)+$`)
+var moveFormat = regexp.MustCompile(`^move:([0-9][0-9],?)+ \([^\)]*\)$`)
 
 func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
 	board := state.Board.ToString()

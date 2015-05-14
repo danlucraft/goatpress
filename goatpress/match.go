@@ -3,7 +3,7 @@ package goatpress
 import (
 	"encoding/json"
 	"fmt"
-  "time"
+	"time"
 )
 
 type Match struct {
@@ -11,8 +11,8 @@ type Match struct {
 	Player1 Player
 	Player2 Player
 	played  bool
-  Time1   int64
-  Time2   int64
+	Time1   int64
+	Time2   int64
 }
 
 func newMatch(gt *GameType, p1 Player, p2 Player) *Match {
@@ -28,8 +28,8 @@ func (m *Match) Play() {
 	messages := [2]int{MSG_NONE, MSG_OPPONENT_MOVE}
 	lastMoves := [2]Move{MakePassMove(), MakePassMove()}
 	move := MakePassMove()
-	m.Player1.NewGame(m.Game.CurrentGameState())
-	m.Player2.NewGame(m.Game.CurrentGameState())
+	m.Player1.NewGame(m.Game.CurrentGameState(), m.Player2.Name())
+	m.Player2.NewGame(m.Game.CurrentGameState(), m.Player1.Name())
 	moveCount := 0
 
 	for m.Game.WhoseMove() != 0 {
@@ -39,7 +39,7 @@ func (m *Match) Play() {
 		response := MOVE_UNMADE
 		i := 0
 		move = MakePassMove()
-    beforeTime := time.Now()
+		beforeTime := time.Now()
 		for i < 100 && response != MOVE_OK { // should have limit on number of invalid moves?
 			lastOpponentMove := lastMoves[(playerIx+1)%2]
 			lastOpponentMoveMessage := ""
@@ -62,16 +62,16 @@ func (m *Match) Play() {
 			}
 			i++
 		}
-    afterTime := time.Now()
-    if !move.IsPass {
-      dur := afterTime.Sub(beforeTime).Nanoseconds()
-      if playerIx == 0 {
-        m.Time1 += dur
-      }
-      if playerIx == 1 {
-        m.Time2 += dur
-      }
-    }
+		afterTime := time.Now()
+		if !move.IsPass {
+			dur := afterTime.Sub(beforeTime).Nanoseconds()
+			if playerIx == 0 {
+				m.Time1 += dur
+			}
+			if playerIx == 1 {
+				m.Time2 += dur
+			}
+		}
 
 		if response != MOVE_OK {
 			move = MakePassMove()
@@ -96,13 +96,15 @@ func (m *Match) Winner() int {
 }
 
 func (m *Match) MoveCount(pl int) int {
-  ix := 1
-  result := 0
-  for _, move := range m.Game.Moves {
-    if !move.IsPass { result++ }
-    ix = (ix % 2) + 1
-  }
-  return result
+	ix := 1
+	result := 0
+	for _, move := range m.Game.Moves {
+		if !move.IsPass {
+			result++
+		}
+		ix = (ix % 2) + 1
+	}
+	return result
 }
 
 type MatchMarshaller struct {

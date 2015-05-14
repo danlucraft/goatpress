@@ -37,7 +37,9 @@ func newServer(dataPath string, clientTimeout string, serverPort int, webPort in
 	gameType := newGameType(5, DefaultWordSet)
 	tourney := newTournament(*gameType, dataPath)
 	randomPlayer := newInternalPlayer("Random", newRandomFinder(DefaultWordSet))
-	randomPlayer2 := newInternalPlayer("Random2", newRandomFinder(DefaultWordSet))
+	randomPlayer2 := newInternalPlayer("Random2", newRandomFinder(HalfWordSet))
+	println(DefaultWordSet.Length())
+	println(HalfWordSet.Length())
 	tourney.RegisterPlayer(randomPlayer)
 	tourney.RegisterPlayer(randomPlayer2)
 	server = &Server{tourney, dataPath, clientTimeout, serverPort, webPort}
