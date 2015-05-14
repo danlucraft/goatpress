@@ -7,7 +7,12 @@ import (
 )
 
 func usage() {
-	fmt.Printf("usage: goatpress-cli OPTIONS (demo|server|client|web)\n")
+	fmt.Printf("usage: goatpress-cli OPTIONS (demo|server|client)\n")
+	fmt.Printf("\n")
+	fmt.Printf("  -name=NAME          Player Name (if running as client)\n")
+	fmt.Printf("  -file=PATH          Where to store tournament history (if server)\n")
+	fmt.Printf("  -serverport=PORT    Game server port (if server/client)\n")
+	fmt.Printf("  -webport=PORT       Web page port (if server)\n")
 }
 
 func main() {
@@ -17,10 +22,11 @@ func main() {
 	serverPort := flag.Int("serverport", 4123, "serverport")
 	webPort := flag.Int("webport", 5123, "webport")
 	flag.Parse()
-	fmt.Printf("command %s\n", flag.Args()[0])
+
 	if len(flag.Args()) < 1 {
 		usage()
 	} else {
+    fmt.Printf("command %s\n", flag.Args()[0])
 		command := flag.Args()[0]
 		if command == "demo" {
 			goatpress.Demo()
@@ -29,7 +35,6 @@ func main() {
 		} else if command == "client" {
 			fmt.Printf("Connecting as player %s\n", *playerName)
 			goatpress.ClientStart(*playerName, *serverPort)
-		} else if command == "web" {
 		} else {
 			usage()
 		}
