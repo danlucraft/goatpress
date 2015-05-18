@@ -151,14 +151,22 @@ func (p ClientPlayer) readLine() (string, error) {
 		go p.Unregister()
 		return "", errors.New("client closed connection")
 	}
-	lastByte := b[len(b)-1]
-	if lastByte == 10 || lastByte == 13 {
-		b = b[0 : len(b)-1]
+
+	var lastByte byte
+	if len(b) > 0 {
+		lastByte := b[len(b)-1]
+		if lastByte == 10 || lastByte == 13 {
+			b = b[0 : len(b)-1]
+		}
 	}
-	lastByte = b[len(b)-1]
-	if lastByte == 10 || lastByte == 13 {
-		b = b[0 : len(b)-1]
+
+	if len(b) > 0 {
+		lastByte = b[len(b)-1]
+		if lastByte == 10 || lastByte == 13 {
+			b = b[0 : len(b)-1]
+		}
 	}
+
 	line := string(b[0:len(b)])
 	//fmt.Printf("%s< %s\n", p.Name(), line)
 	return line, nil
