@@ -32,7 +32,7 @@ func main() {
 		if command == "demo" {
 			goatpress.Demo()
 		} else if command == "server" {
-			fmt.Printf("Web port:    %s\n", *webPort)
+			fmt.Printf("Web port:    %d\n", *webPort)
 			goatpress.ServerStart(*tournamentFile, *clientTimeout, *serverPort, *webPort)
 		} else if command == "client" {
 			fmt.Printf("Player name: %s\n", *playerName)
