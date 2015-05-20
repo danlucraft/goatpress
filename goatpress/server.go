@@ -16,6 +16,11 @@ const (
 	scoreForMove       = 10
 	scoreForDraw       = 100
 	scoreForWin        = 1000
+
+	clientPingInterval      = 50 * time.Millisecond
+	newMatchAttemptInterval = 10 * time.Millisecond
+
+	iterationsBeforeSaving = 10000
 )
 
 var (
@@ -142,20 +147,43 @@ func (c *Server) RunTournament() {
 	address := serverAddress + fmt.Sprintf(":%d", c.serverPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		fmt.Printf("error listening:", err.Error())
+		fmt.Printf("error listening: %s\n", err.Error())
 		os.Exit(1)
 	}
-	matchTicker := 0
-	playersTicker := 0
+	iterationCount := 0
+	pingTicker := time.NewTicker(clientPingInterval)
+	matchTicker := time.NewTicker(newMatchAttemptInterval)
+
 	go AcceptPlayers(listener, c.clientTimeout)
 
 	for {
+		iterationCount += 1
+		// Every so often, display the player list and save the tournament
+		if iterationCount > iterationsBeforeSaving {
+			fmt.Printf("Players: %s\n", c.Tournament.PlayerList())
+			c.Tournament.Save()
+			iterationCount = 0
+		}
 		select {
+
+		case <-pingTicker.C:
+			for name, player := range c.Tournament.Players {
+				if !c.Tournament.InProgress[name] {
+					go player.Ping()
+				}
+
+			}
+
+		case <-matchTicker.C:
+			c.Tournament.PlayMatch()
 
 		case newPlayer := <-newPlayers:
 			if newPlayer.Name() != "" {
 				fmt.Printf("Player online: %s\n", newPlayer.Name())
 				c.Tournament.RegisterPlayer(newPlayer)
+
+				// attempt to get the player to a match right away
+				c.Tournament.PlayMatch()
 			}
 
 		case removePlayerName := <-removePlayers:
@@ -167,30 +195,7 @@ func (c *Server) RunTournament() {
 		case result := <-matchResults:
 			c.Tournament.RecordResult(result)
 
-		default:
-			for name, player := range c.Tournament.Players {
-				if !c.Tournament.InProgress[name] {
-					player.Ping()
-				}
-			}
-			if c.Tournament.NonPlayingCount() > 1 {
-				c.Tournament.PlayMatch()
-				matchTicker++
-				if matchTicker > 10 {
-					c.Tournament.Save()
-					matchTicker = 0
-				}
-			} else {
-				time.Sleep(0.2 * 1e9)
-			}
 		}
-
-		playersTicker++
-		if playersTicker > 1000000 {
-			fmt.Printf("Players: %s\n", c.Tournament.PlayerList())
-			playersTicker = 0
-		}
-		time.Sleep(100)
 	}
 }
 
