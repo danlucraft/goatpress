@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	serverAddress      = "127.0.0.1"
+	serverAddress      = "172.30.1.246"
 	scoreForConnection = 1
 	scoreForMove       = 10
 	scoreForDraw       = 100
