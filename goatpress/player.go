@@ -26,6 +26,8 @@ const (
 	MSG_BAD_MOVE_ALREADY
 	MSG_BAD_MOVE_TOO_SHORT
 	MSG_OPPONENT_MOVE
+
+	TCP_TIMEOUT = 10 * time.Second
 )
 
 type InternalPlayer struct {
@@ -106,8 +108,7 @@ func (p *ClientPlayer) Ping() bool {
 	p.writeLine("; ping ?")
 	line, _ := p.readLine()
 	if line != "pong" {
-		go p.Unregister()
-		p.conn.Close()
+		go p.Unregister("Bad ping response")
 		return false
 	}
 	return true
@@ -120,8 +121,8 @@ func (p *ClientPlayer) writeLine(req string) error {
 	p.conn.SetWriteDeadline(p.deadline())
 	_, err := p.conn.Write([]byte(req + "\n"))
 	if err != nil {
-		fmt.Println(err)
-		go p.Unregister()
+		fmt.Println("writeline error: ", err)
+		go p.Unregister(err.Error())
 		return errors.New("client closed connection on write")
 	}
 	//fmt.Printf("%s> %s\n", p.Name(), req)
@@ -135,9 +136,7 @@ func ValidateName(name string) bool {
 }
 
 func (p ClientPlayer) deadline() time.Time {
-	t := time.Now()
-	d, _ := time.ParseDuration("10s")
-	return t.Add(d)
+	return time.Now().Add(TCP_TIMEOUT)
 }
 
 func (p ClientPlayer) readLine() (string, error) {
@@ -147,8 +146,8 @@ func (p ClientPlayer) readLine() (string, error) {
 	p.conn.SetReadDeadline(p.deadline())
 	b, err := p.reader.ReadBytes('\n')
 	if err != nil {
-		fmt.Println(err)
-		go p.Unregister()
+		fmt.Println("Readline error: ", err)
+		go p.Unregister(err.Error())
 		return "", errors.New("client closed connection")
 	}
 
@@ -178,9 +177,10 @@ func (p *ClientPlayer) Disconnect(reason string) {
 	p.closed = true
 }
 
-func (p *ClientPlayer) Unregister() {
-	p.Disconnect("\"reasons\"")
+func (p *ClientPlayer) Unregister(reason string) {
 	p.unregister <- p.name
+	<-time.After(time.Millisecond * 80)
+	p.Disconnect(reason)
 }
 
 var moveFormat = regexp.MustCompile(`^move:([0-9][0-9],?)+ \([^\)]*\)$`)
@@ -206,7 +206,7 @@ func (p *ClientPlayer) GetMove(msg int, info string, state GameState) Move {
 	req := bit1 + " ; move " + board + " " + colors + " ?"
 	err1 := p.writeLine(req)
 	if err1 != nil {
-		//fmt.Printf("%s passes due to closed connection\n", p.name)
+		fmt.Printf("%s passes due to closed connection: %s\n", p.name, err1.Error())
 		return MakePassMove()
 	}
 
