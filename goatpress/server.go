@@ -125,7 +125,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		if scores.MoveCounts[name] > 0 {
 			mt = (scores.Times[name] / int64(scores.MoveCounts[name])) / 1000
 		}
-		stat := PlayerInfo{name, score / 10, games, moves, wins, draws, losses, mt, isConnectedClass}
+		stat := PlayerInfo{name, score, games, moves, wins, draws, losses, mt, isConnectedClass}
 		stats = append(stats, &stat)
 	}
 
