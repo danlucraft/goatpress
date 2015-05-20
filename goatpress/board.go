@@ -96,6 +96,9 @@ func (board *Board) MoveFromTiles(tiles []Tile) Move {
 	word := ""
 	isPass := (len(tiles) == 0)
 	for _, tile := range tiles {
+        if tile.X() > 4 || tile.Y() > 4 || tile.X() < 0 || tile.Y() < 0 {
+          return MakePassMove()
+        }
 		word += board.Letters[tile.X()][tile.Y()]
 	}
 	return Move{isPass, tiles, word}
