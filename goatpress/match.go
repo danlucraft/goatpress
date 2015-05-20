@@ -44,7 +44,11 @@ func (m *Match) Play() {
 			lastOpponentMove := lastMoves[(playerIx+1)%2]
 			lastOpponentMoveMessage := ""
 			lastOpponentMoveMessage = lastOpponentMove.ToMessage()
+			//if thisPlayer.Closed() {
+			//move = MakePassMove()
+			//} else {
 			move = thisPlayer.GetMove(messages[playerIx], lastOpponentMoveMessage, m.Game.CurrentGameState())
+			//}
 			response = m.Game.Move(move)
 			switch response {
 			case MOVE_OK:

@@ -89,6 +89,9 @@ func (t *Tournament) RegisterPlayer(p Player) {
 }
 
 func (t *Tournament) DeregisterPlayer(name string) {
+	//if player := t.Players[name]; player != nil {
+	//player.SetClosed(true)
+	//}
 	delete(t.Players, name)
 }
 

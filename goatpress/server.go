@@ -20,7 +20,7 @@ const (
 	clientPingInterval      = 50 * time.Millisecond
 	newMatchAttemptInterval = 10 * time.Millisecond
 
-	iterationsBeforeSaving = 10000
+	iterationsBeforeSaving = 100
 )
 
 var (
@@ -167,12 +167,14 @@ func (c *Server) RunTournament() {
 		select {
 
 		case <-pingTicker.C:
-			for name, player := range c.Tournament.Players {
-				if !c.Tournament.InProgress[name] {
-					go player.Ping()
-				}
-
-			}
+			// Pings are
+			//for name, player := range c.Tournament.Players {
+			//go func() {
+			//if !c.Tournament.InProgress[name] {
+			//player.Ping()
+			//}
+			//}()
+			//}
 
 		case <-matchTicker.C:
 			c.Tournament.PlayMatch()

@@ -113,27 +113,27 @@
   <p>Rules are the same as in Letterpress iOS game.</p>
   <p><b>Server messages</b> The message format looks like this:</p>
   <pre><code>[INFO] ; [QUESTION ?] \n</code></pre>
-  <p>A board looks like this: <code>nnaou mkhuu ifnfg baurn cruil</code></p>
-  <p>Board coloring is also send. If you move first you are player 1.</p>
+  <p>A board looks like this, where each word is a row on the board. <code>ncexu tcrie nmcoo tueda rctio</code></p>
+  <p>Board coloring is also sent, which looks like <code>21120 10121 12020 21121 10122</code>. If you move first you are player 1, otherwise you are player 2.</p>
   <p><b>Responses</b>
   <p>If you are asked a question you must respond.
   Your response should terminate with a newline:</p>
   <ul>
-    <li><b>Name?</b> Reply with your players name (with ruby variable naming rules)</li>
+    <li><b>Name?</b> Reply with your players name, in the format <code>/[a-zA-Z][a-zA-Z0-9]*/</code></li>
     <li><b>Ping?</b> Reply with <code>pong</code></li>
-    <li><b>Move?</b> Reply with <code>move:43,12,31</code> meaning, in the case of the example board above, "iha",
+    <li><b>Move?</b> Reply with <code>move:14,00,30,23,20,02 (entone)</code> 
     or alternatively <code>pass</code>.</li>
   </ul>
   <p>A badly formatted reply to a move question is an automatic pass.<br />
   A badly formatted reply to a pong question is an automatic disconnection.</p>
   <p>Get points for:</p>
   <ul>
-    <li>Making a move: 1/10</li>
-    <li>Completing a game: 1</li>
-    <li>Drawing a game: 1</li>
-    <li>Winning a game: 10</li>
+    <li>Connecting correctly: 1</li>
+    <li>Making a move: 10</li>
+    <li>Drawing a game: 100</li>
+    <li>Winning a game: 1000</li>
   </ul>
-  <p>You can start racking up points as soon as your client is able.</p>
+  <p>You can start racking up points as soon as your client is able. For instance, if all you can do is connect, you can run your client again and again to get 1 point each time.</p>
 </div>
 
 

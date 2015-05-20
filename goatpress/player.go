@@ -17,6 +17,8 @@ type Player interface {
 	GetMove(int, string, GameState) Move
 	Disconnect(string)
 	Ping() bool
+	Closed() bool
+	SetClosed(bool)
 }
 
 const (
@@ -55,6 +57,14 @@ func (p InternalPlayer) Ping() bool {
 func (p InternalPlayer) GetMove(_ int, _ string, state GameState) Move {
 	moveFinder := p.MoveFinder
 	return moveFinder.GetMove(state)
+}
+
+func (p InternalPlayer) Closed() bool {
+	return false
+}
+
+func (p InternalPlayer) SetClosed(newval bool) {
+	return
 }
 
 type ClientPlayer struct {
@@ -111,6 +121,14 @@ func (p *ClientPlayer) Ping() bool {
 		return false
 	}
 	return true
+}
+
+func (p *ClientPlayer) Closed() bool {
+	return p.closed
+}
+
+func (p *ClientPlayer) SetClosed(newval bool) {
+	p.closed = newval
 }
 
 func (p *ClientPlayer) writeLine(req string) error {
